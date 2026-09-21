@@ -1,0 +1,100 @@
+[
+  {
+    "repository": "legacy-apps",
+    "url": "https://svn.example.com/svn/legacy-apps",
+    "uuid": "svn-legacy-apps",
+    "paths": [
+      {
+        "path": "/trunk/claims",
+        "kind": "dir",
+        "last_revision": 41000,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy Claims (Notes)"
+      },
+      {
+        "path": "/trunk/dispatch",
+        "kind": "dir",
+        "last_revision": 41037,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy Dispatch (Notes)"
+      },
+      {
+        "path": "/trunk/ratetool",
+        "kind": "dir",
+        "last_revision": 41074,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy Rate Tool (Notes)"
+      },
+      {
+        "path": "/trunk/vendordb",
+        "kind": "dir",
+        "last_revision": 41111,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy Vendor DB (Notes)"
+      },
+      {
+        "path": "/trunk/safetylog",
+        "kind": "dir",
+        "last_revision": 41148,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy Safety Log (Notes)"
+      }
+    ]
+  },
+  {
+    "repository": "fleet-legacy",
+    "url": "https://svn.example.com/svn/fleet-legacy",
+    "uuid": "svn-fleet-legacy",
+    "paths": [
+      {
+        "path": "/trunk/fleetnotes",
+        "kind": "dir",
+        "last_revision": 41000,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy Fleet Notes"
+      },
+      {
+        "path": "/trunk/inspection-v1",
+        "kind": "dir",
+        "last_revision": 41037,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Fleet Inspection"
+      }
+    ]
+  },
+  {
+    "repository": "corporate-legacy",
+    "url": "https://svn.example.com/svn/corporate-legacy",
+    "uuid": "svn-corporate-legacy",
+    "paths": [
+      {
+        "path": "/trunk/hrforms",
+        "kind": "dir",
+        "last_revision": 41000,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy HR Forms (Notes)"
+      },
+      {
+        "path": "/trunk/opswiki",
+        "kind": "dir",
+        "last_revision": 41037,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Legacy Ops Wiki (Notes)"
+      },
+      {
+        "path": "/trunk/lms-v1",
+        "kind": "dir",
+        "last_revision": 41074,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Learning Management"
+      },
+      {
+        "path": "/trunk/procure-v2",
+        "kind": "dir",
+        "last_revision": 41111,
+        "last_changed": "2026-04-18T11:02:00Z",
+        "hint": "Procurement Workflow"
+      }
+    ]
+  }
+]

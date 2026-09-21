@@ -1,0 +1,335 @@
+[
+  {
+    "id": "JEN-0001",
+    "coordinate": "registry.meridian/plm-client",
+    "artifact_type": "container",
+    "pipeline": "plm/client-release",
+    "last_build": "2026-09-11T04:07:00Z",
+    "last_build_number": 403,
+    "hint_app": "PLM Suite"
+  },
+  {
+    "id": "JEN-0002",
+    "coordinate": "com.meridian.plm:plm-server",
+    "artifact_type": "jar",
+    "pipeline": "plm/server-release",
+    "last_build": "2026-09-12T04:14:00Z",
+    "last_build_number": 406,
+    "hint_app": "PLM Suite"
+  },
+  {
+    "id": "JEN-0003",
+    "coordinate": "com.meridian.plm:plm-protocol",
+    "artifact_type": "jar",
+    "pipeline": "plm/protocol-release",
+    "last_build": "2026-09-13T04:21:00Z",
+    "last_build_number": 409,
+    "hint_app": "PLM Suite"
+  },
+  {
+    "id": "JEN-0004",
+    "coordinate": "com.meridian.billing:billing-core",
+    "artifact_type": "jar",
+    "pipeline": "billing/core",
+    "last_build": "2026-09-14T04:28:00Z",
+    "last_build_number": 412,
+    "hint_app": "Billing Platform"
+  },
+  {
+    "id": "JEN-0005",
+    "coordinate": "com.meridian.billing:settlement",
+    "artifact_type": "jar",
+    "pipeline": "billing/settlement",
+    "last_build": "2026-09-15T04:35:00Z",
+    "last_build_number": 415,
+    "hint_app": "Billing Platform"
+  },
+  {
+    "id": "JEN-0006",
+    "coordinate": "com.meridian.billing:adjustments",
+    "artifact_type": "jar",
+    "pipeline": "billing/adjustments",
+    "last_build": "2026-09-16T04:42:00Z",
+    "last_build_number": 418,
+    "hint_app": "Billing Platform"
+  },
+  {
+    "id": "JEN-0007",
+    "coordinate": "registry.meridian/quote-engine",
+    "artifact_type": "container",
+    "pipeline": "revenue/quote",
+    "last_build": "2026-09-17T04:49:00Z",
+    "last_build_number": 421,
+    "hint_app": "Freight Quote Engine"
+  },
+  {
+    "id": "JEN-0008",
+    "coordinate": "registry.meridian/customer-portal",
+    "artifact_type": "container",
+    "pipeline": "digital/portal",
+    "last_build": "2026-09-18T04:56:00Z",
+    "last_build_number": 424,
+    "hint_app": "Customer Portal"
+  },
+  {
+    "id": "JEN-0009",
+    "coordinate": "registry.meridian/portal-bff",
+    "artifact_type": "container",
+    "pipeline": "digital/portal-bff",
+    "last_build": "2026-09-19T04:03:00Z",
+    "last_build_number": 427,
+    "hint_app": "Customer Portal"
+  },
+  {
+    "id": "JEN-0010",
+    "coordinate": "meridian-driver-ios",
+    "artifact_type": "ipa",
+    "pipeline": "mobile/ios-release",
+    "last_build": "2026-09-20T04:10:00Z",
+    "last_build_number": 430,
+    "hint_app": "Driver Mobile App"
+  },
+  {
+    "id": "JEN-0011",
+    "coordinate": "meridian-driver-android",
+    "artifact_type": "apk",
+    "pipeline": "mobile/android-release",
+    "last_build": "2026-09-10T04:17:00Z",
+    "last_build_number": 433,
+    "hint_app": "Driver Mobile App"
+  },
+  {
+    "id": "JEN-0012",
+    "coordinate": "registry.meridian/route-optimizer",
+    "artifact_type": "container",
+    "pipeline": "or/route-opt",
+    "last_build": "2026-09-11T04:24:00Z",
+    "last_build_number": 436,
+    "hint_app": "Route Optimizer"
+  },
+  {
+    "id": "JEN-0013",
+    "coordinate": "com.meridian.wms:wms-core",
+    "artifact_type": "jar",
+    "pipeline": "warehouse/wms",
+    "last_build": "2026-09-12T04:31:00Z",
+    "last_build_number": 439,
+    "hint_app": "Warehouse Management"
+  },
+  {
+    "id": "JEN-0014",
+    "coordinate": "registry.meridian/wms-rf-client",
+    "artifact_type": "container",
+    "pipeline": "warehouse/rf",
+    "last_build": "2026-09-13T04:38:00Z",
+    "last_build_number": 442,
+    "hint_app": "Warehouse Management"
+  },
+  {
+    "id": "JEN-0015",
+    "coordinate": "registry.meridian/telematics-ingest",
+    "artifact_type": "container",
+    "pipeline": "fleet/telematics",
+    "last_build": "2026-09-14T04:45:00Z",
+    "last_build_number": 445,
+    "hint_app": "Telematics Ingest"
+  },
+  {
+    "id": "JEN-0016",
+    "coordinate": "com.meridian.edi:edi-gateway",
+    "artifact_type": "jar",
+    "pipeline": "integration/edi",
+    "last_build": "2026-09-15T04:52:00Z",
+    "last_build_number": 448,
+    "hint_app": "EDI Gateway"
+  },
+  {
+    "id": "JEN-0017",
+    "coordinate": "com.meridian.customs:filing",
+    "artifact_type": "jar",
+    "pipeline": "integration/customs",
+    "last_build": "2026-09-16T04:59:00Z",
+    "last_build_number": 451,
+    "hint_app": "Customs Filing"
+  },
+  {
+    "id": "JEN-0018",
+    "coordinate": "registry.meridian/rate-card",
+    "artifact_type": "container",
+    "pipeline": "revenue/ratecard",
+    "last_build": "2026-09-17T04:06:00Z",
+    "last_build_number": 454,
+    "hint_app": "Rate Card Service"
+  },
+  {
+    "id": "JEN-0019",
+    "coordinate": "com.meridian.pay:gateway-adapter",
+    "artifact_type": "jar",
+    "pipeline": "revenue/paygw",
+    "last_build": "2026-09-18T04:13:00Z",
+    "last_build_number": 457,
+    "hint_app": "Payment Gateway Adapter"
+  },
+  {
+    "id": "JEN-0020",
+    "coordinate": "registry.meridian/hr-portal",
+    "artifact_type": "container",
+    "pipeline": "corp/hr",
+    "last_build": "2026-09-19T04:20:00Z",
+    "last_build_number": 460,
+    "hint_app": "HR Portal"
+  },
+  {
+    "id": "JEN-0021",
+    "coordinate": "com.meridian.hr:payroll-bridge",
+    "artifact_type": "jar",
+    "pipeline": "corp/payroll",
+    "last_build": "2026-09-20T04:27:00Z",
+    "last_build_number": 463,
+    "hint_app": "Payroll Bridge"
+  },
+  {
+    "id": "JEN-0022",
+    "coordinate": "registry.meridian/vendor-portal",
+    "artifact_type": "container",
+    "pipeline": "procurement/vendor",
+    "last_build": "2026-09-10T04:34:00Z",
+    "last_build_number": 466,
+    "hint_app": "Vendor Portal"
+  },
+  {
+    "id": "JEN-0023",
+    "coordinate": "registry.meridian/contract-repository",
+    "artifact_type": "container",
+    "pipeline": "legal/contracts",
+    "last_build": "2026-09-11T04:41:00Z",
+    "last_build_number": 469,
+    "hint_app": "Contract Repository"
+  },
+  {
+    "id": "JEN-0024",
+    "coordinate": "com.meridian.fleet:asset-tracking",
+    "artifact_type": "jar",
+    "pipeline": "fleet/assets",
+    "last_build": "2026-09-12T04:48:00Z",
+    "last_build_number": 472,
+    "hint_app": "Asset Tracking"
+  },
+  {
+    "id": "JEN-0025",
+    "coordinate": "com.meridian.fleet:maintenance",
+    "artifact_type": "jar",
+    "pipeline": "fleet/maint",
+    "last_build": "2026-09-13T04:55:00Z",
+    "last_build_number": 475,
+    "hint_app": "Maintenance Scheduler"
+  },
+  {
+    "id": "JEN-0026",
+    "coordinate": "registry.meridian/compliance-reporting",
+    "artifact_type": "container",
+    "pipeline": "risk/compliance",
+    "last_build": "2026-09-14T04:02:00Z",
+    "last_build_number": 478,
+    "hint_app": "Compliance Reporting"
+  },
+  {
+    "id": "JEN-0027",
+    "coordinate": "registry.meridian/shipment-tracking",
+    "artifact_type": "container",
+    "pipeline": "digital/tracking",
+    "last_build": "2026-09-15T04:09:00Z",
+    "last_build_number": 481,
+    "hint_app": "Shipment Tracking API"
+  },
+  {
+    "id": "JEN-0028",
+    "coordinate": "registry.meridian/notification-service",
+    "artifact_type": "container",
+    "pipeline": "digital/notify",
+    "last_build": "2026-09-16T04:16:00Z",
+    "last_build_number": 484,
+    "hint_app": "Notification Service"
+  },
+  {
+    "id": "JEN-0029",
+    "coordinate": "com.meridian.platform:identity-broker",
+    "artifact_type": "jar",
+    "pipeline": "platform/idbroker",
+    "last_build": "2026-09-17T04:23:00Z",
+    "last_build_number": 487,
+    "hint_app": "Identity Broker"
+  },
+  {
+    "id": "JEN-0030",
+    "coordinate": "registry.meridian/datalake-ingest",
+    "artifact_type": "container",
+    "pipeline": "data/lake-ingest",
+    "last_build": "2026-09-18T04:30:00Z",
+    "last_build_number": 490,
+    "hint_app": "Data Lake Ingest"
+  },
+  {
+    "id": "JEN-0031",
+    "coordinate": "registry.meridian/brokerage-match",
+    "artifact_type": "container",
+    "pipeline": "revenue/brokerage",
+    "last_build": "2026-09-19T04:37:00Z",
+    "last_build_number": 493,
+    "hint_app": "Brokerage Match"
+  },
+  {
+    "id": "JEN-0032",
+    "coordinate": "registry.meridian/scanhub",
+    "artifact_type": "container",
+    "pipeline": "platform/scanhub",
+    "last_build": "2026-09-20T04:44:00Z",
+    "last_build_number": 496,
+    "hint_app": "ScanHub"
+  },
+  {
+    "id": "JEN-0033",
+    "coordinate": "registry.meridian/flowmon",
+    "artifact_type": "container",
+    "pipeline": "platform/flowmon",
+    "last_build": "2026-09-10T04:51:00Z",
+    "last_build_number": 499,
+    "hint_app": "FlowMon"
+  },
+  {
+    "id": "JEN-0034",
+    "coordinate": "registry.meridian/edge-cache-shim",
+    "artifact_type": "container",
+    "pipeline": "platform/edge-cache",
+    "last_build": "2026-09-11T04:58:00Z",
+    "last_build_number": 502,
+    "hint_app": null
+  },
+  {
+    "id": "JEN-0035",
+    "coordinate": "com.meridian.misc:report-exporter",
+    "artifact_type": "jar",
+    "pipeline": "data/report-export",
+    "last_build": "2026-09-12T04:05:00Z",
+    "last_build_number": 505,
+    "hint_app": null
+  },
+  {
+    "id": "JEN-0036",
+    "coordinate": "registry.meridian/partner-webhook-relay",
+    "artifact_type": "container",
+    "pipeline": "integration/webhook-relay",
+    "last_build": "2026-09-13T04:12:00Z",
+    "last_build_number": 508,
+    "hint_app": null
+  },
+  {
+    "id": "JEN-0037",
+    "coordinate": "com.meridian.misc:legacy-batch-runner",
+    "artifact_type": "jar",
+    "pipeline": "corp/legacy-batch",
+    "last_build": "2026-09-14T04:19:00Z",
+    "last_build_number": 511,
+    "hint_app": null
+  }
+]

@@ -1,0 +1,1622 @@
+openapi: 3.1.0
+
+info:
+  title: SSDLC Onboarding & Tracking API
+  version: 0.1.0-slice1
+  description: |
+    Slice 1: inventory -> mapping -> coverage.  No SSDLC definitions, no evidence
+    collection, no credentials.  See DESIGN.md §8.1.
+
+    Two design constraints shape this contract:
+
+    * **It is the product boundary.** The companion skill (§5.1) reads current state
+      here before proposing anything, then reports explicit typed operations. Nothing
+      in the contract assumes the caller is our own UI.
+    * **It must support a UI we did not write** (§9.2). Every value the application
+      filters, sorts or displays is a first-class field. There are no opaque payloads.
+
+    Authentication is a bearer token. Single organization (§9.1) — no tenant scoping.
+
+    **There is no null source.** Every entity resolves to a `source`, including the
+    ones this application owns rather than federates — applications and managed
+    entities belong to the seeded **Internal Register** (`role: internal`). A null
+    would be a special case every consumer has to be told about; a source of kind
+    `internal` is queryable by the same code path as ServiceNow.
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: sources
+    description: |
+      Every connected system, registered once per role. A GitHub instance serving
+      both repositories and Actions builds is two registrations under two ids —
+      deliberately, so the teams that own each can work without colliding.
+  - name: code
+    description: Repositories and subtree scopes
+  - name: build
+    description: Build artifacts
+  - name: applications
+    description: Golden-record applications and their managed entities
+  - name: packets
+    description: Decision packets — the export/decide/diff/apply round trip (§4)
+  - name: decisions
+    description: Recorded decisions and their subjects (§5.5)
+  - name: coverage
+    description: Coverage, orphans, onboarding funnel (§7)
+  - name: audit
+    description: Append-only audit log and lineage (§6)
+
+paths:
+
+  # ---------------------------------------------------------------- sources
+
+  /sources:
+    get:
+      tags: [sources]
+      summary: List connected sources
+      parameters:
+        - { name: role, in: query,
+            schema: { type: string, enum: [inventory, code, build, evidence] } }
+        - { name: kind, in: query, schema: { type: string } }
+        - { name: owner_team, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Source" }
+    post:
+      tags: [sources]
+      summary: Register a source
+      description: |
+        One registration per **role**. The same system serving two roles is
+        registered twice under two ids — CMDB scoping and repository/build mapping
+        are done by different people, and a shared registration would make their
+        edits, sync cadences and staleness collide.
+
+        For `role: inventory`, tier selection is user configuration captured as
+        `tier_selection`. We do not infer which CI class represents an application
+        (§3.2.1).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SourceCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Source" }
+
+  /sources/{sourceId}:
+    parameters:
+      - $ref: "#/components/parameters/SourceId"
+    get:
+      tags: [sources]
+      summary: Get one source
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Source" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /sources/{sourceId}/retire:
+    parameters:
+      - $ref: "#/components/parameters/SourceId"
+    post:
+      tags: [sources]
+      summary: Retire a source, reparenting everything it brought
+      description: |
+        Removing a source does **not** remove what came from it. Its subjects are
+        reparented to the Internal Register: a record from a decommissioned
+        ServiceNow instance becomes an internally-maintained record. Application
+        IDs, source links, mappings, decisions and audit history all survive.
+
+        **This is not a way to delete entities.** Anyone who wants them gone removes
+        them first, deliberately, as its own decision with its own rationale.
+
+        Writes a reparenting artifact — every subject with its id, display name,
+        former source and former external id, plus the source configuration — so a
+        catastrophe is recoverable. There is no restore endpoint: the artifact plus
+        this API is enough to reconstruct, and that path is rare enough that
+        inference beats code maintained against the day it is needed (P8).
+
+        `is_system` sources cannot be retired.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rationale, retired_by]
+              properties:
+                rationale: { type: string }
+                retired_by: { type: string }
+      responses:
+        "200":
+          description: Retired
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  source_id: { type: string }
+                  reparented_count: { type: integer }
+                  reparented_by_type:
+                    type: object
+                    additionalProperties: { type: integer }
+                  artifact_ref:
+                    type: string
+                    description: Path to the reparenting artifact
+                  decision_id: { type: string }
+        "409":
+          description: Refused — `is_system` source
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /sources/{sourceId}/inventory:
+    parameters:
+      - $ref: "#/components/parameters/SourceId"
+    get:
+      tags: [sources]
+      summary: What we already know about this source
+      description: |
+        The orientation endpoint. The skill calls this before proposing anything, so
+        it can compute a delta at the source rather than handing us a snapshot to
+        diff (§5.2). Returns keys, content hashes and decision status — deliberately
+        compact.
+      parameters:
+        - { name: scope_status, in: query,
+            schema: { type: string, enum: [undecided, manage, reject, defer] } }
+        - { name: since, in: query, schema: { type: string, format: date-time } }
+        - { name: include_absent, in: query, schema: { type: boolean, default: false } }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/InventoryRecordSummary" }
+                  next_cursor: { type: string, nullable: true }
+
+  /sources/{sourceId}/changeset:
+    parameters:
+      - $ref: "#/components/parameters/SourceId"
+    post:
+      tags: [sources]
+      summary: Report what changed (preferred ingestion path)
+      description: |
+        Explicit typed operations, not a snapshot. `remove` is an **assertion** that
+        the record is gone from the source — never an inference we draw from absence
+        (§5.2). A `remove` sets `absent_since` and raises a review item; it never
+        deletes.
+
+        `decisions` carrying `confirmed_by_user: true` are applied with the named
+        actor recorded. Unconfirmed decisions are queued for UI review.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Changeset" }
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /sources/{sourceId}/snapshot:
+    parameters:
+      - $ref: "#/components/parameters/SourceId"
+    post:
+      tags: [sources]
+      summary: Submit a full or scoped snapshot (fallback ingestion path)
+      description: |
+        For when the skill cannot compute a delta — a person hands over a CSV export.
+        We diff it ourselves.
+
+        **`completeness` is correctness-critical** (§5.3). Only `full` and `scoped`
+        may mark records absent, and `scoped` only within its `scope_declaration`.
+        Omitting it means `partial`, which never marks anything absent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Snapshot" }
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncResult" }
+
+  # ------------------------------------------------------------------- code
+
+  /repositories:
+    get:
+      tags: [code]
+      summary: List repositories
+      parameters:
+        - { name: source_id, in: query, schema: { type: string } }
+        - { name: mapped, in: query, schema: { type: boolean },
+            description: "false returns unmapped repositories — code with no declared home" }
+        - { name: archived, in: query, schema: { type: boolean } }
+        - { name: q, in: query, schema: { type: string } }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Repository" }
+                  next_cursor: { type: string, nullable: true }
+
+  /repositories/{repositoryId}:
+    parameters:
+      - { name: repositoryId, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [code]
+      summary: Get one repository with its scopes and mappings
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RepositoryDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /repositories/{repositoryId}/scopes:
+    parameters:
+      - { name: repositoryId, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [code]
+      summary: Declare a subtree scope
+      description: Required for SVN `/trunk/project` layouts and monorepos (§3.3).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path_prefix, name]
+              properties:
+                path_prefix: { type: string, example: "/trunk/dispatch" }
+                name: { type: string, example: "Legacy Dispatch" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RepoScope" }
+
+  # ------------------------------------------------------------------ build
+
+  /build-artifacts:
+    get:
+      tags: [build]
+      summary: List build artifacts
+      parameters:
+        - { name: governed, in: query, schema: { type: boolean },
+            description: "false returns artifacts with no managed entity — shipping, ungoverned" }
+        - { name: managed_entity_id, in: query, schema: { type: string } }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/BuildArtifact" }
+                  next_cursor: { type: string, nullable: true }
+
+  # ----------------------------------------------------------- applications
+
+  /applications:
+    get:
+      tags: [applications]
+      summary: List applications
+      parameters:
+        - { name: origin, in: query,
+            schema: { type: string, enum: [federated, manual, inferred] } }
+        - { name: status, in: query,
+            schema: { type: string, enum: [active, merged, retired, orphaned] } }
+        - { name: onboarding_state, in: query,
+            schema: { type: string, enum: [discovered, in_scope, decomposed, bound, instrumented, observed] } }
+        - { name: q, in: query, schema: { type: string } }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Application" }
+                  next_cursor: { type: string, nullable: true }
+    post:
+      tags: [applications]
+      summary: Create an application
+      description: |
+        For `manual` (in no inventory source) and `inferred` (created from an
+        unattached repository or shipping artifact) origins. `federated`
+        applications are created by applying a scope decision.
+
+        A default managed entity spanning the whole application is created
+        automatically — decomposition is refinement, never a prerequisite (P5).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApplicationCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Application" }
+
+  /applications/{applicationId}:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    get:
+      tags: [applications]
+      summary: Get one application
+      description: |
+        Resolves aliases: requesting a merged application's retired id returns the
+        canonical record with `resolved_from` set. Retired ids resolve forever (§3.2).
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /applications/{applicationId}/lineage:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    get:
+      tags: [applications, audit]
+      summary: How this application ID came to exist
+      description: |
+        A projection of the audit log, rendered as an ordered narrative (§6). This is
+        the deliverable, not a debug view — it answers "who decided this, when, from
+        what input, on what basis" for any application ID in the system.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Lineage" }
+
+  /applications/{applicationId}/merge:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    post:
+      tags: [applications]
+      summary: Merge another application into this one
+      description: Non-destructive. The absorbed id becomes an alias and keeps resolving.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [absorb_application_id, rationale, decided_by]
+              properties:
+                absorb_application_id: { type: string }
+                rationale: { type: string }
+                decided_by: { type: string }
+      responses:
+        "200":
+          description: Merged
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationDetail" }
+
+  /applications/{applicationId}/managed-entities:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    get:
+      tags: [applications]
+      summary: List managed entities
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ManagedEntity" }
+    post:
+      tags: [applications]
+      summary: Declare a managed entity
+      description: |
+        `rationale` is required prose — the record of why these things are managed
+        together (P4). A managed entity may have zero build artifacts; that is L0,
+        not an error.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ManagedEntityCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ManagedEntity" }
+
+  /applications/{applicationId}/classification:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    get:
+      tags: [applications]
+      summary: List classification labels
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ClassificationLabel" }
+    post:
+      tags: [applications]
+      summary: Record a classification label
+      description: |
+        The user's vocabulary, not ours (§3.5.3). `axis` and `value` are free text.
+        `rationale` is required — a label without stated reasoning is a guess with a
+        label on it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [axis, value, rationale, set_by]
+              properties:
+                axis: { type: string, example: exposure }
+                value: { type: string, example: internet-facing }
+                rationale: { type: string }
+                set_by: { type: string }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClassificationLabel" }
+
+  # ---------------------------------------------------------------- packets
+
+  /decision-packets:
+    get:
+      tags: [packets]
+      summary: List decision packets
+      parameters:
+        - { name: status, in: query,
+            schema: { type: string, enum: [open, returned, applied, abandoned] } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DecisionPacket" }
+    post:
+      tags: [packets]
+      summary: Create a decision packet (the export half of the round trip)
+      description: |
+        Builds the candidate list and generates the prompt the user pastes into a
+        Claude session (§4). The quality of what we put in the packet bounds the
+        quality of the judgment that comes back — this is the product surface, not
+        a serialization detail.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DecisionPacketCreate" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DecisionPacket" }
+
+  /decision-packets/{packetId}:
+    parameters:
+      - $ref: "#/components/parameters/PacketId"
+    get:
+      tags: [packets]
+      summary: Get a packet with its rows and generated prompt
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DecisionPacketDetail" }
+
+  /decision-packets/{packetId}/export:
+    parameters:
+      - $ref: "#/components/parameters/PacketId"
+      - { name: format, in: query, schema: { type: string, enum: [markdown, csv, json], default: markdown } }
+    get:
+      tags: [packets]
+      summary: Download the packet in a paste-ready form
+      responses:
+        "200":
+          description: OK
+          content:
+            text/markdown: { schema: { type: string } }
+            text/csv: { schema: { type: string } }
+            application/json: { schema: { type: object } }
+
+  /decision-packets/{packetId}/return:
+    parameters:
+      - $ref: "#/components/parameters/PacketId"
+    post:
+      tags: [packets]
+      summary: Submit the decided list
+      description: |
+        Tolerant parser — CSV, JSON, a markdown table, or pasted prose. The only hard
+        requirement is that `record_key` survives the round trip unchanged.
+
+        A row that does not come back is **undecided**, not rejected. Absence is never
+        inferred as a decision (§4 rule 6).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [returned_raw]
+              properties:
+                returned_raw: { type: string, description: "Verbatim, archived as-is" }
+                format_hint: { type: string, enum: [csv, json, markdown, prose] }
+      responses:
+        "200":
+          description: Parsed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PacketDiff" }
+
+  /decision-packets/{packetId}/diff:
+    parameters:
+      - $ref: "#/components/parameters/PacketId"
+    get:
+      tags: [packets]
+      summary: What applying this packet would change
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PacketDiff" }
+
+  /decision-packets/{packetId}/apply:
+    parameters:
+      - $ref: "#/components/parameters/PacketId"
+    post:
+      tags: [packets]
+      summary: Apply the decisions
+      description: |
+        Creates one `Decision` per distinct rationale, with a `DecisionSubject` per
+        record — so ten applications decided out of scope for the same reason share
+        one rationale (§5.5).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [applied_by]
+              properties:
+                applied_by: { type: string }
+                only_record_keys:
+                  type: array
+                  items: { type: string }
+                  description: Apply a subset; omit for all decided rows
+      responses:
+        "200":
+          description: Applied
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplyResult" }
+
+  # -------------------------------------------------------------- decisions
+
+  /decisions:
+    get:
+      tags: [decisions]
+      summary: List decisions
+      parameters:
+        - { name: kind, in: query,
+            schema: { type: string, enum: [scope, mapping, decomposition, dedupe, orphan, classification, definition_assignment] } }
+        - { name: decided_by, in: query, schema: { type: string } }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Decision" }
+                  next_cursor: { type: string, nullable: true }
+
+  /decisions/{decisionId}:
+    parameters:
+      - { name: decisionId, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [decisions]
+      summary: Get a decision and all its subjects
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DecisionDetail" }
+
+  /decisions/stale-subjects:
+    get:
+      tags: [decisions]
+      summary: Subjects whose decision needs re-review
+      description: |
+        A decision is never invalidated by a record changing — the subject is marked
+        **stale**, meaning a person decided this and the thing they decided about has
+        since moved (§5.5). The decision keeps its effect until re-decided.
+      parameters:
+        - { name: subject_type, in: query, schema: { type: string } }
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StaleSubject" }
+
+  /decisions/{decisionId}/reaffirm:
+    parameters:
+      - { name: decisionId, in: path, required: true, schema: { type: string } }
+    post:
+      tags: [decisions]
+      summary: Re-affirm a decision against current content
+      description: The cheap path for a stale subject whose change does not alter the reasoning.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject_ids, decided_by]
+              properties:
+                subject_ids: { type: array, items: { type: string } }
+                decided_by: { type: string }
+                note: { type: string }
+      responses:
+        "200":
+          description: Re-affirmed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DecisionDetail" }
+
+  # --------------------------------------------------------------- coverage
+
+  /coverage/summary:
+    get:
+      tags: [coverage]
+      summary: Coverage and onboarding funnel
+      description: |
+        Three states stay distinguishable throughout: **observed-low**, **unknown**,
+        and **waived/dispositioned**. A gap we have never looked at is not the same
+        as one we looked at and accepted.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CoverageSummary" }
+
+  /coverage/orphans/{orphanType}:
+    parameters:
+      - name: orphanType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [build_artifact, repository, application, inferred_application]
+    get:
+      tags: [coverage]
+      summary: List orphans of one kind
+      description: |
+        Orphans are computed views, not stored rows (§7). `build_artifact` is the one
+        that earns the project: something ships that nothing governs.
+      parameters:
+        - { name: include_dispositioned, in: query, schema: { type: boolean, default: false } }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Orphan" }
+                  next_cursor: { type: string, nullable: true }
+
+  /coverage/orphans/{orphanType}/{subjectId}/disposition:
+    parameters:
+      - { name: orphanType, in: path, required: true, schema: { type: string } }
+      - { name: subjectId, in: path, required: true, schema: { type: string } }
+    put:
+      tags: [coverage]
+      summary: Silence an orphan without deleting it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status, reason, set_by]
+              properties:
+                status: { type: string, enum: [acknowledged, ignored, deferred] }
+                reason: { type: string }
+                until: { type: string, format: date-time, nullable: true }
+                set_by: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OrphanDisposition" }
+
+  # ------------------------------------------------------------------ audit
+
+  /audit:
+    get:
+      tags: [audit]
+      summary: Query the append-only audit log
+      parameters:
+        - { name: subject_id, in: query, schema: { type: string } }
+        - { name: subject_type, in: query, schema: { type: string } }
+        - { name: actor, in: query, schema: { type: string } }
+        - { name: decision_id, in: query, schema: { type: string } }
+        - { name: decision_packet_id, in: query, schema: { type: string } }
+        - { name: since, in: query, schema: { type: string, format: date-time } }
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/AuditEvent" }
+                  next_cursor: { type: string, nullable: true }
+
+  /sync-runs:
+    get:
+      tags: [audit]
+      summary: List sync runs
+      parameters:
+        - { name: source_id, in: query, schema: { type: string } }
+        - { name: role, in: query, schema: { type: string, enum: [inventory, code, build, evidence] } }
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SyncRun" }
+
+  /sync-runs/{syncRunId}:
+    parameters:
+      - { name: syncRunId, in: path, required: true, schema: { type: string } }
+    get:
+      tags: [audit]
+      summary: Get a sync run with its operations
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncRunDetail" }
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  parameters:
+    SourceId:
+      { name: sourceId, in: path, required: true, schema: { type: string } }
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema: { type: string }
+      description: Application ULID or handle (APP-0427). Retired ids resolve via alias.
+    PacketId:
+      { name: packetId, in: path, required: true, schema: { type: string } }
+    Limit:
+      { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 100 } }
+    Cursor:
+      { name: cursor, in: query, schema: { type: string } }
+
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+
+    Error:
+      description: |
+        Errors carry enough context to act on without reading our source code —
+        what was attempted, against what, and what to do about it (P8). The
+        consumer may be an agent recovering from a rare path, not a developer
+        with a debugger.
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string, description: One sentence, plain prose }
+        detail: { type: string, nullable: true,
+                  description: What was attempted, against which subject or source }
+        remedy: { type: string, nullable: true,
+                  description: What would make the request succeed, if anything would }
+        subject_id: { type: string, nullable: true }
+        source_id: { type: string, nullable: true }
+
+    Attribute:
+      description: Typed attribute. Not a JSON blob (§9.2).
+      type: object
+      required: [key, value_type]
+      properties:
+        key: { type: string }
+        value_type: { type: string, enum: [text, number, datetime, bool] }
+        value_text: { type: string, nullable: true }
+        value_number: { type: number, nullable: true }
+        value_datetime: { type: string, format: date-time, nullable: true }
+        value_bool: { type: boolean, nullable: true }
+
+    # ---- inventory
+
+    Source:
+      type: object
+      properties:
+        id: { type: string }
+        role:
+          type: string
+          enum: [inventory, code, build, evidence, internal]
+          description: |
+            Immutable. One registration per system per role. `internal` is the
+            seeded Internal Register and cannot be created via this API.
+        is_system:
+          type: boolean
+          description: |
+            Seeded, undeletable, never synced. Hidden from "connect a source"
+            flows. Today there is exactly one: the Internal Register.
+        kind:
+          type: string
+          description: Vendor or protocol — servicenow, github, svn, jenkins, csv_list, ...
+        name: { type: string, description: "Unique within a role, not globally" }
+        base_url: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        owner_team: { type: string, nullable: true,
+                      description: Who manages this registration }
+        tier_selection: { type: string, nullable: true, description: "inventory role only" }
+        priority: { type: integer, nullable: true,
+                    description: "inventory role only — survivorship default, lower wins" }
+        expected_cadence_days: { type: integer, nullable: true }
+        record_count: { type: integer }
+        last_sync_at: { type: string, format: date-time, nullable: true }
+        last_sync_by: { type: string, nullable: true }
+        last_sync_method: { type: string, nullable: true }
+        last_sync_completeness: { type: string, nullable: true }
+        staleness_days: { type: integer, nullable: true,
+                          description: "Displayed as fact, never as an alarm (§5.8)" }
+        created_at: { type: string, format: date-time }
+
+    SourceCreate:
+      type: object
+      required: [role, kind, name, created_by]
+      properties:
+        role:
+          type: string
+          enum: [inventory, code, build, evidence]
+          description: "`internal` is not creatable — that source is seeded."
+        kind: { type: string }
+        name: { type: string }
+        base_url: { type: string }
+        description: { type: string }
+        owner_team: { type: string }
+        expected_cadence_days: { type: integer }
+        tier_selection:
+          type: string
+          description: |
+            inventory role only. Which CI class/tier the user chose — user
+            configuration, not inference.
+        decision_fields:
+          type: array
+          items: { type: string }
+          description: |
+            inventory role only. Which fields make a change **material** and so mark
+            an existing decision stale (§5.4). `content_hash` is computed over exactly
+            these. Defaults to name, class, lifecycle, criticality, owner.
+        priority: { type: integer, default: 100, description: "inventory role only" }
+        created_by: { type: string }
+
+    InventoryRecordSummary:
+      description: Compact orientation shape for the skill's pre-flight read.
+      type: object
+      properties:
+        external_id: { type: string }
+        name: { type: string }
+        content_hash: { type: string }
+        scope_status: { type: string, enum: [undecided, manage, reject, defer] }
+        scope_stale: { type: boolean }
+        last_seen: { type: string, format: date-time }
+        absent_since: { type: string, format: date-time, nullable: true }
+        application_id: { type: string, nullable: true }
+
+    # ---- sync
+
+    Changeset:
+      type: object
+      required: [contract_version, actor, method, ops]
+      properties:
+        contract_version: { type: string, example: "1.0" }
+        skill_version: { type: string }
+        actor: { type: string }
+        method: { type: string, enum: [api, export_file, web_ui, human_entry],
+                  description: "Determines trust tier. An API pull is `collected`; typed entry is `attested`." }
+        ops:
+          type: array
+          items: { $ref: "#/components/schemas/ChangeOp" }
+        decisions:
+          type: array
+          items: { $ref: "#/components/schemas/InlineDecision" }
+
+    ChangeOp:
+      type: object
+      required: [op, key]
+      properties:
+        op: { type: string, enum: [add, update, remove, unchanged] }
+        key: { type: string, description: External id at the source }
+        name: { type: string }
+        description: { type: string }
+        record_class: { type: string }
+        lifecycle_state: { type: string }
+        criticality: { type: string }
+        business_owner: { type: string }
+        engineering_owner: { type: string }
+        changed_fields: { type: array, items: { type: string } }
+        reason: { type: string, description: "For `remove`: why the source no longer has it" }
+        attributes:
+          type: array
+          items: { $ref: "#/components/schemas/Attribute" }
+
+    InlineDecision:
+      description: |
+        A judgment made in the skill session. `confirmed_by_user: true` means a named
+        person decided it there — that is the human review, and it applies directly.
+      type: object
+      required: [key, decision, rationale, confirmed_by_user]
+      properties:
+        key: { type: string }
+        decision: { type: string, example: manage }
+        rationale: { type: string }
+        confirmed_by_user: { type: boolean }
+        decided_by: { type: string }
+
+    Snapshot:
+      type: object
+      required: [contract_version, actor, method, completeness, records]
+      properties:
+        contract_version: { type: string }
+        skill_version: { type: string }
+        actor: { type: string }
+        method: { type: string, enum: [api, export_file, web_ui, human_entry] }
+        completeness:
+          type: string
+          enum: [full, scoped, partial]
+          default: partial
+          description: |
+            `full` may mark absences. `scoped` may mark absences within
+            `scope_declaration` only. `partial` never marks absences — additive only.
+            Defaulting to `partial` is failing safe (§5.3).
+        scope_declaration: { type: string, example: "class = Business Application" }
+        records:
+          type: array
+          items: { $ref: "#/components/schemas/ChangeOp" }
+
+    SyncResult:
+      type: object
+      properties:
+        sync_run_id: { type: string }
+        mode: { type: string, enum: [changeset, snapshot] }
+        completeness: { type: string }
+        counts:
+          type: object
+          properties:
+            new: { type: integer }
+            material: { type: integer,
+                        description: "Changed in a decision-relevant field; decision marked stale" }
+            immaterial: { type: integer }
+            unchanged: { type: integer }
+            absent: { type: integer }
+        decisions_applied: { type: integer }
+        decisions_queued: { type: integer }
+        warnings: { type: array, items: { type: string } }
+
+    SyncRun:
+      type: object
+      properties:
+        id: { type: string }
+        source_id: { type: string }
+        source_name: { type: string }
+        source_role: { type: string, enum: [inventory, code, build, evidence] }
+        mode: { type: string }
+        method: { type: string }
+        completeness: { type: string }
+        scope_declaration: { type: string, nullable: true }
+        actor: { type: string }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time, nullable: true }
+        record_count: { type: integer }
+        status: { type: string, enum: [running, complete, failed] }
+        status_detail: { type: string, nullable: true }
+
+    SyncRunDetail:
+      allOf:
+        - $ref: "#/components/schemas/SyncRun"
+        - type: object
+          properties:
+            ops:
+              type: array
+              items:
+                type: object
+                properties:
+                  op: { type: string }
+                  record_key: { type: string }
+                  change_class: { type: string }
+                  changed_fields: { type: string, nullable: true }
+                  detail: { type: string, nullable: true }
+
+    # ---- code and build
+
+    Repository:
+      type: object
+      properties:
+        id: { type: string }
+        source_id: { type: string }
+        source_name: { type: string }
+        external_id: { type: string }
+        name: { type: string }
+        url: { type: string, nullable: true }
+        default_branch: { type: string, nullable: true }
+        primary_language: { type: string, nullable: true }
+        last_commit_at: { type: string, format: date-time, nullable: true }
+        archived: { type: boolean }
+        mapped: { type: boolean }
+        application_id: { type: string, nullable: true }
+        application_handle: { type: string, nullable: true }
+        scope_count: { type: integer }
+
+    RepoScope:
+      type: object
+      properties:
+        id: { type: string }
+        repository_id: { type: string }
+        path_prefix: { type: string }
+        name: { type: string }
+        mapped: { type: boolean }
+
+    RepositoryDetail:
+      allOf:
+        - $ref: "#/components/schemas/Repository"
+        - type: object
+          properties:
+            scopes:
+              type: array
+              items: { $ref: "#/components/schemas/RepoScope" }
+            mappings:
+              type: array
+              items:
+                type: object
+                properties:
+                  application_id: { type: string }
+                  application_handle: { type: string }
+                  managed_entity_id: { type: string, nullable: true }
+                  managed_entity_name: { type: string, nullable: true }
+                  repo_scope_id: { type: string, nullable: true }
+                  decision_id: { type: string, nullable: true }
+            attributes:
+              type: array
+              items: { $ref: "#/components/schemas/Attribute" }
+
+    BuildArtifact:
+      type: object
+      properties:
+        id: { type: string }
+        source_id: { type: string }
+        source_name: { type: string }
+        coordinate: { type: string }
+        artifact_type: { type: string, nullable: true }
+        pipeline_ref: { type: string, nullable: true }
+        managed_entity_id: { type: string, nullable: true }
+        managed_entity_name: { type: string, nullable: true }
+        application_handle: { type: string, nullable: true }
+        governed: { type: boolean, description: "false = something ships that nothing governs" }
+        last_seen: { type: string, format: date-time }
+
+    # ---- applications
+
+    Application:
+      type: object
+      properties:
+        id: { type: string }
+        handle: { type: string, example: APP-0427 }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        origin: { type: string, enum: [federated, manual, inferred] }
+        business_owner: { type: string, nullable: true }
+        engineering_owner: { type: string, nullable: true }
+        criticality: { type: string, nullable: true }
+        lifecycle_state: { type: string, nullable: true }
+        status: { type: string, enum: [active, merged, retired, orphaned] }
+        onboarding_state:
+          type: string
+          enum: [discovered, in_scope, decomposed, bound, instrumented, observed]
+        source_count: { type: integer }
+        managed_entity_count: { type: integer }
+        repository_count: { type: integer }
+        has_attribute_conflict: { type: boolean,
+                                  description: "Sources disagree on a federated field" }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    ApplicationCreate:
+      type: object
+      required: [name, origin, created_by]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        origin: { type: string, enum: [manual, inferred] }
+        business_owner: { type: string }
+        engineering_owner: { type: string }
+        criticality: { type: string }
+        lifecycle_state: { type: string }
+        rationale:
+          type: string
+          description: Why this exists outside any inventory source. Required for `inferred`.
+        created_by: { type: string }
+
+    ApplicationDetail:
+      allOf:
+        - $ref: "#/components/schemas/Application"
+        - type: object
+          properties:
+            resolved_from: { type: string, nullable: true,
+                             description: "Set when reached via a retired alias id" }
+            source_links:
+              type: array
+              items:
+                type: object
+                properties:
+                  inventory_record_id: { type: string }
+                  source_id: { type: string }
+                  source_name: { type: string }
+                  external_id: { type: string }
+                  absent_since: { type: string, format: date-time, nullable: true }
+            attribute_resolution:
+              description: Which source won each federated field, and why (§3.2)
+              type: array
+              items:
+                type: object
+                properties:
+                  field: { type: string }
+                  resolved_value: { type: string, nullable: true }
+                  winning_source_name: { type: string, nullable: true }
+                  reason: { type: string, enum: [only_source, priority, manual_override] }
+                  conflict: { type: boolean }
+                  competing_values:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        source_name: { type: string }
+                        value: { type: string, nullable: true }
+            managed_entities:
+              type: array
+              items: { $ref: "#/components/schemas/ManagedEntity" }
+            classification:
+              type: array
+              items: { $ref: "#/components/schemas/ClassificationLabel" }
+            aliases:
+              type: array
+              items:
+                type: object
+                properties:
+                  alias_id: { type: string }
+                  alias_handle: { type: string }
+                  merged_at: { type: string, format: date-time }
+
+    ManagedEntity:
+      type: object
+      properties:
+        id: { type: string }
+        application_id: { type: string }
+        name: { type: string }
+        kind: { type: string, nullable: true }
+        rationale: { type: string, description: "Required prose (P4)" }
+        is_default: { type: boolean }
+        artifact_count: { type: integer }
+        repository_count: { type: integer }
+        decision_id: { type: string, nullable: true }
+        created_by: { type: string }
+        created_at: { type: string, format: date-time }
+
+    ManagedEntityCreate:
+      type: object
+      required: [name, rationale, created_by]
+      properties:
+        name: { type: string }
+        kind:
+          type: string
+          enum: [client, server, service, library, job, mobile, firmware, infra, whole_application]
+        rationale:
+          type: string
+          description: Why these things are managed together. Required.
+        created_by: { type: string }
+        build_artifact_ids: { type: array, items: { type: string } }
+        repository_ids: { type: array, items: { type: string } }
+
+    ClassificationLabel:
+      type: object
+      properties:
+        id: { type: string }
+        axis: { type: string, description: "The user's vocabulary, free text" }
+        value: { type: string }
+        rationale: { type: string }
+        set_by: { type: string }
+        set_at: { type: string, format: date-time }
+
+    # ---- packets and decisions
+
+    DecisionPacket:
+      type: object
+      properties:
+        id: { type: string }
+        subject_type: { type: string, enum: [inventory_record, repository, application, build_artifact] }
+        purpose: { type: string }
+        row_count: { type: integer }
+        status: { type: string, enum: [open, returned, applied, abandoned] }
+        created_by: { type: string }
+        created_at: { type: string, format: date-time }
+        applied_by: { type: string, nullable: true }
+        applied_at: { type: string, format: date-time, nullable: true }
+
+    DecisionPacketCreate:
+      type: object
+      required: [subject_type, purpose, created_by]
+      properties:
+        subject_type: { type: string, enum: [inventory_record, repository, application, build_artifact] }
+        purpose: { type: string, example: "Which ServiceNow business applications need SSDLC management?" }
+        source_id: { type: string }
+        filter:
+          type: object
+          description: Which candidates to include. Selection, not judgment.
+          properties:
+            scope_status: { type: string }
+            unmapped_only: { type: boolean }
+            include_stale: { type: boolean }
+            record_class: { type: string }
+        suggested_rules:
+          type: array
+          items: { type: string }
+          description: |
+            Prose hints embedded in the generated prompt, e.g. "records where
+            class = Business Application and status = Production". We suggest them
+            as text; we never implement or evaluate them (§4).
+        created_by: { type: string }
+
+    DecisionPacketDetail:
+      allOf:
+        - $ref: "#/components/schemas/DecisionPacket"
+        - type: object
+          properties:
+            prompt_text:
+              type: string
+              description: Generated prompt the user pastes into a Claude session
+            rows:
+              type: array
+              items: { $ref: "#/components/schemas/PacketRow" }
+
+    PacketRow:
+      description: |
+        Everything needed to decide, in one row. The export is the product surface —
+        judgment made in the chat session is bounded by what we put here.
+      type: object
+      properties:
+        record_key: { type: string, description: "Opaque; must survive the round trip unchanged" }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        record_class: { type: string, nullable: true }
+        lifecycle_state: { type: string, nullable: true }
+        criticality: { type: string, nullable: true }
+        business_owner: { type: string, nullable: true }
+        engineering_owner: { type: string, nullable: true }
+        current_decision: { type: string, nullable: true }
+        current_rationale: { type: string, nullable: true }
+        stale: { type: boolean }
+        changed_since_decision: { type: array, items: { type: string } }
+        context:
+          type: array
+          items: { $ref: "#/components/schemas/Attribute" }
+
+    PacketDiff:
+      type: object
+      properties:
+        packet_id: { type: string }
+        parsed_rows: { type: integer }
+        unrecognized_keys: { type: array, items: { type: string } }
+        undecided_keys:
+          type: array
+          items: { type: string }
+          description: In the packet, absent from the return. Undecided, not rejected.
+        changes:
+          type: array
+          items:
+            type: object
+            properties:
+              record_key: { type: string }
+              name: { type: string }
+              from: { type: string, nullable: true }
+              to: { type: string }
+              rationale: { type: string }
+              is_change: { type: boolean }
+        rationale_groups:
+          description: Distinct rationales, each becoming one Decision over many subjects (§5.5)
+          type: array
+          items:
+            type: object
+            properties:
+              rationale: { type: string }
+              disposition: { type: string }
+              subject_count: { type: integer }
+
+    ApplyResult:
+      type: object
+      properties:
+        packet_id: { type: string }
+        decisions_created: { type: integer }
+        subjects_affected: { type: integer }
+        applications_created: { type: integer }
+        decision_ids: { type: array, items: { type: string } }
+
+    Decision:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        disposition: { type: string }
+        rationale: { type: string }
+        decided_by: { type: string }
+        decided_at: { type: string, format: date-time }
+        decision_packet_id: { type: string, nullable: true }
+        confirmed_by_user: { type: boolean }
+        subject_count: { type: integer }
+        stale_subject_count: { type: integer }
+        superseded_by: { type: string, nullable: true }
+
+    DecisionDetail:
+      allOf:
+        - $ref: "#/components/schemas/Decision"
+        - type: object
+          properties:
+            subjects:
+              type: array
+              items:
+                type: object
+                description: Resolved through the subject registry.
+                properties:
+                  subject_id: { type: string }
+                  subject_type:
+                    type: string
+                    enum: [source, inventory_record, application, managed_entity,
+                           repository, repo_scope, build_artifact]
+                  display_name: { type: string }
+                  source_name: { type: string }
+                  source_role: { type: string,
+                                 description: "`internal` means we own the row rather than federate it" }
+                  status: { type: string, enum: [current, stale, superseded] }
+                  decided_against_hash: { type: string, nullable: true }
+                  went_stale_at: { type: string, format: date-time, nullable: true }
+
+    StaleSubject:
+      type: object
+      properties:
+        decision_id: { type: string }
+        kind: { type: string }
+        disposition: { type: string }
+        rationale: { type: string }
+        decided_by: { type: string }
+        decided_at: { type: string, format: date-time }
+        subject_id: { type: string }
+        subject_type: { type: string }
+        display_name: { type: string }
+        source_name: { type: string }
+        source_role: { type: string }
+        went_stale_at: { type: string, format: date-time, nullable: true }
+        changed_fields: { type: array, items: { type: string } }
+
+    # ---- coverage and audit
+
+    CoverageSummary:
+      type: object
+      properties:
+        applications:
+          type: object
+          properties:
+            total: { type: integer }
+            by_origin:
+              type: object
+              properties:
+                federated: { type: integer }
+                manual: { type: integer }
+                inferred: { type: integer }
+            by_onboarding_state:
+              type: object
+              additionalProperties: { type: integer }
+        inventory:
+          type: object
+          properties:
+            records_total: { type: integer }
+            undecided: { type: integer }
+            managed: { type: integer }
+            rejected: { type: integer }
+            deferred: { type: integer }
+            stale_decisions: { type: integer }
+            absent: { type: integer }
+        code:
+          type: object
+          properties:
+            repositories_total: { type: integer }
+            mapped: { type: integer }
+            unmapped: { type: integer }
+            unmapped_dispositioned: { type: integer }
+        build:
+          type: object
+          properties:
+            artifacts_total: { type: integer }
+            governed: { type: integer }
+            ungoverned: { type: integer }
+            ungoverned_dispositioned: { type: integer }
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              kind: { type: string }
+              last_sync_at: { type: string, format: date-time, nullable: true }
+              staleness_days: { type: integer, nullable: true }
+              expected_cadence_days: { type: integer, nullable: true }
+
+    Orphan:
+      type: object
+      properties:
+        subject_id: { type: string }
+        subject_type: { type: string }
+        display_name: { type: string }
+        detail: { type: string, nullable: true }
+        source_name: { type: string }
+        last_seen: { type: string, format: date-time, nullable: true }
+        disposition: { $ref: "#/components/schemas/OrphanDisposition" }
+
+    OrphanDisposition:
+      type: object
+      nullable: true
+      properties:
+        status: { type: string, enum: [acknowledged, ignored, deferred] }
+        reason: { type: string }
+        until: { type: string, format: date-time, nullable: true }
+        set_by: { type: string }
+        set_at: { type: string, format: date-time }
+
+    AuditEvent:
+      type: object
+      properties:
+        id: { type: string }
+        at: { type: string, format: date-time }
+        actor: { type: string }
+        action: { type: string }
+        subject_id: { type: string, nullable: true,
+                      description: "null for process-only events (packet created, sync started)" }
+        subject_type: { type: string, nullable: true }
+        display_name: { type: string, nullable: true }
+        before_text: { type: string, nullable: true }
+        after_text: { type: string, nullable: true }
+        rationale: { type: string, nullable: true }
+        decision_id: { type: string, nullable: true }
+        decision_packet_id: { type: string, nullable: true }
+        sync_run_id: { type: string, nullable: true }
+
+    Lineage:
+      type: object
+      properties:
+        application_id: { type: string }
+        handle: { type: string }
+        name: { type: string }
+        narrative:
+          type: string
+          description: |
+            Rendered prose, e.g. "APP-0427 — originated from ServiceNow record
+            BSVC00123, ingested 2026-03-04 during source setup by joe@; brought in
+            scope via decision packet #14 (Claude chat, applied by joe@); merged with
+            APP-0611 by sarah@ 2026-04-02."
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/AuditEvent" }

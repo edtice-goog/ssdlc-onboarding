@@ -1,0 +1,938 @@
+[
+  {
+    "id": 7001,
+    "name": "plm-client",
+    "full_name": "meridian-freight/plm-client",
+    "html_url": "https://github.example.com/meridian-freight/plm-client",
+    "default_branch": "main",
+    "language": "C#",
+    "archived": false,
+    "pushed_at": "2026-09-12T09:14:00Z",
+    "description": "Part of PLM Suite.",
+    "topics": [
+      "app-plm"
+    ]
+  },
+  {
+    "id": 7002,
+    "name": "plm-server",
+    "full_name": "meridian-freight/plm-server",
+    "html_url": "https://github.example.com/meridian-freight/plm-server",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-18T09:14:00Z",
+    "description": "Part of PLM Suite.",
+    "topics": [
+      "app-plm"
+    ]
+  },
+  {
+    "id": 7003,
+    "name": "plm-shared-protocol",
+    "full_name": "meridian-freight/plm-shared-protocol",
+    "html_url": "https://github.example.com/meridian-freight/plm-shared-protocol",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-07-02T09:14:00Z",
+    "description": "Part of PLM Suite.",
+    "topics": [
+      "app-plm"
+    ]
+  },
+  {
+    "id": 7004,
+    "name": "billing-core",
+    "full_name": "meridian-freight/billing-core",
+    "html_url": "https://github.example.com/meridian-freight/billing-core",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-19T09:14:00Z",
+    "description": "Part of Billing Platform.",
+    "topics": [
+      "app-billing"
+    ]
+  },
+  {
+    "id": 7005,
+    "name": "billing-settlement",
+    "full_name": "meridian-freight/billing-settlement",
+    "html_url": "https://github.example.com/meridian-freight/billing-settlement",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-11T09:14:00Z",
+    "description": "Part of Billing Platform.",
+    "topics": [
+      "app-billing"
+    ]
+  },
+  {
+    "id": 7006,
+    "name": "billing-adjustments",
+    "full_name": "meridian-freight/billing-adjustments",
+    "html_url": "https://github.example.com/meridian-freight/billing-adjustments",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-08-28T09:14:00Z",
+    "description": "Part of Billing Platform.",
+    "topics": [
+      "app-billing"
+    ]
+  },
+  {
+    "id": 7007,
+    "name": "quote-engine",
+    "full_name": "meridian-freight/quote-engine",
+    "html_url": "https://github.example.com/meridian-freight/quote-engine",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-20T09:14:00Z",
+    "description": "Part of Freight Quote Engine.",
+    "topics": [
+      "app-quote"
+    ]
+  },
+  {
+    "id": 7008,
+    "name": "quote-rules",
+    "full_name": "meridian-freight/quote-rules",
+    "html_url": "https://github.example.com/meridian-freight/quote-rules",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-05T09:14:00Z",
+    "description": "Part of Freight Quote Engine.",
+    "topics": [
+      "app-quote"
+    ]
+  },
+  {
+    "id": 7009,
+    "name": "customer-portal",
+    "full_name": "meridian-freight/customer-portal",
+    "html_url": "https://github.example.com/meridian-freight/customer-portal",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": false,
+    "pushed_at": "2026-09-19T09:14:00Z",
+    "description": "Part of Customer Portal.",
+    "topics": [
+      "app-portal"
+    ]
+  },
+  {
+    "id": 7010,
+    "name": "portal-bff",
+    "full_name": "meridian-freight/portal-bff",
+    "html_url": "https://github.example.com/meridian-freight/portal-bff",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": false,
+    "pushed_at": "2026-09-17T09:14:00Z",
+    "description": "Part of Customer Portal.",
+    "topics": [
+      "app-portal"
+    ]
+  },
+  {
+    "id": 7011,
+    "name": "driver-app-ios",
+    "full_name": "meridian-freight/driver-app-ios",
+    "html_url": "https://github.example.com/meridian-freight/driver-app-ios",
+    "default_branch": "main",
+    "language": "Swift",
+    "archived": false,
+    "pushed_at": "2026-09-16T09:14:00Z",
+    "description": "Part of Driver Mobile App.",
+    "topics": [
+      "app-driverapp"
+    ]
+  },
+  {
+    "id": 7012,
+    "name": "driver-app-android",
+    "full_name": "meridian-freight/driver-app-android",
+    "html_url": "https://github.example.com/meridian-freight/driver-app-android",
+    "default_branch": "main",
+    "language": "Kotlin",
+    "archived": false,
+    "pushed_at": "2026-09-16T09:14:00Z",
+    "description": "Part of Driver Mobile App.",
+    "topics": [
+      "app-driverapp"
+    ]
+  },
+  {
+    "id": 7013,
+    "name": "driver-app-sync",
+    "full_name": "meridian-freight/driver-app-sync",
+    "html_url": "https://github.example.com/meridian-freight/driver-app-sync",
+    "default_branch": "main",
+    "language": "Kotlin",
+    "archived": false,
+    "pushed_at": "2026-08-30T09:14:00Z",
+    "description": "Part of Driver Mobile App.",
+    "topics": [
+      "app-driverapp"
+    ]
+  },
+  {
+    "id": 7014,
+    "name": "route-optimizer",
+    "full_name": "meridian-freight/route-optimizer",
+    "html_url": "https://github.example.com/meridian-freight/route-optimizer",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-09-09T09:14:00Z",
+    "description": "Part of Route Optimizer.",
+    "topics": [
+      "app-routeopt"
+    ]
+  },
+  {
+    "id": 7015,
+    "name": "wms-core",
+    "full_name": "meridian-freight/wms-core",
+    "html_url": "https://github.example.com/meridian-freight/wms-core",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-15T09:14:00Z",
+    "description": "Part of Warehouse Management.",
+    "topics": [
+      "app-wms"
+    ]
+  },
+  {
+    "id": 7016,
+    "name": "wms-rf-client",
+    "full_name": "meridian-freight/wms-rf-client",
+    "html_url": "https://github.example.com/meridian-freight/wms-rf-client",
+    "default_branch": "main",
+    "language": "C#",
+    "archived": false,
+    "pushed_at": "2026-08-21T09:14:00Z",
+    "description": "Part of Warehouse Management.",
+    "topics": [
+      "app-wms"
+    ]
+  },
+  {
+    "id": 7017,
+    "name": "yard-management",
+    "full_name": "meridian-freight/yard-management",
+    "html_url": "https://github.example.com/meridian-freight/yard-management",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-07-30T09:14:00Z",
+    "description": "Part of Yard Management.",
+    "topics": [
+      "app-yard"
+    ]
+  },
+  {
+    "id": 7018,
+    "name": "telematics-ingest",
+    "full_name": "meridian-freight/telematics-ingest",
+    "html_url": "https://github.example.com/meridian-freight/telematics-ingest",
+    "default_branch": "main",
+    "language": "Rust",
+    "archived": false,
+    "pushed_at": "2026-09-18T09:14:00Z",
+    "description": "Part of Telematics Ingest.",
+    "topics": [
+      "app-telematics"
+    ]
+  },
+  {
+    "id": 7019,
+    "name": "telematics-decoder",
+    "full_name": "meridian-freight/telematics-decoder",
+    "html_url": "https://github.example.com/meridian-freight/telematics-decoder",
+    "default_branch": "main",
+    "language": "Rust",
+    "archived": false,
+    "pushed_at": "2026-09-02T09:14:00Z",
+    "description": "Part of Telematics Ingest.",
+    "topics": [
+      "app-telematics"
+    ]
+  },
+  {
+    "id": 7020,
+    "name": "edi-gateway",
+    "full_name": "meridian-freight/edi-gateway",
+    "html_url": "https://github.example.com/meridian-freight/edi-gateway",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-13T09:14:00Z",
+    "description": "Part of EDI Gateway.",
+    "topics": [
+      "app-edi"
+    ]
+  },
+  {
+    "id": 7021,
+    "name": "edi-maps",
+    "full_name": "meridian-freight/edi-maps",
+    "html_url": "https://github.example.com/meridian-freight/edi-maps",
+    "default_branch": "main",
+    "language": "XSLT",
+    "archived": false,
+    "pushed_at": "2026-06-14T09:14:00Z",
+    "description": "Part of EDI Gateway.",
+    "topics": [
+      "app-edi"
+    ]
+  },
+  {
+    "id": 7022,
+    "name": "customs-filing",
+    "full_name": "meridian-freight/customs-filing",
+    "html_url": "https://github.example.com/meridian-freight/customs-filing",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-08T09:14:00Z",
+    "description": "Part of Customs Filing.",
+    "topics": [
+      "app-customs"
+    ]
+  },
+  {
+    "id": 7023,
+    "name": "rate-card-service",
+    "full_name": "meridian-freight/rate-card-service",
+    "html_url": "https://github.example.com/meridian-freight/rate-card-service",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-04T09:14:00Z",
+    "description": "Part of Rate Card Service.",
+    "topics": [
+      "app-ratecard"
+    ]
+  },
+  {
+    "id": 7024,
+    "name": "invoice-recon",
+    "full_name": "meridian-freight/invoice-recon",
+    "html_url": "https://github.example.com/meridian-freight/invoice-recon",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-08-19T09:14:00Z",
+    "description": "Part of Invoice Reconciliation.",
+    "topics": [
+      "app-recon"
+    ]
+  },
+  {
+    "id": 7025,
+    "name": "payment-gateway-adapter",
+    "full_name": "meridian-freight/payment-gateway-adapter",
+    "html_url": "https://github.example.com/meridian-freight/payment-gateway-adapter",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-10T09:14:00Z",
+    "description": "Part of Payment Gateway Adapter.",
+    "topics": [
+      "app-paygw"
+    ]
+  },
+  {
+    "id": 7026,
+    "name": "fuel-card-sync",
+    "full_name": "meridian-freight/fuel-card-sync",
+    "html_url": "https://github.example.com/meridian-freight/fuel-card-sync",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-05-22T09:14:00Z",
+    "description": "Part of Fuel Card Integration.",
+    "topics": [
+      "app-fuelcard"
+    ]
+  },
+  {
+    "id": 7027,
+    "name": "hr-portal",
+    "full_name": "meridian-freight/hr-portal",
+    "html_url": "https://github.example.com/meridian-freight/hr-portal",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": false,
+    "pushed_at": "2026-08-27T09:14:00Z",
+    "description": "Part of HR Portal.",
+    "topics": [
+      "app-hrportal"
+    ]
+  },
+  {
+    "id": 7028,
+    "name": "payroll-bridge",
+    "full_name": "meridian-freight/payroll-bridge",
+    "html_url": "https://github.example.com/meridian-freight/payroll-bridge",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-01T09:14:00Z",
+    "description": "Part of Payroll Bridge.",
+    "topics": [
+      "app-payroll"
+    ]
+  },
+  {
+    "id": 7029,
+    "name": "expense-tool",
+    "full_name": "meridian-freight/expense-tool",
+    "html_url": "https://github.example.com/meridian-freight/expense-tool",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": false,
+    "pushed_at": "2026-07-16T09:14:00Z",
+    "description": "Part of Expense Tool.",
+    "topics": [
+      "app-expense"
+    ]
+  },
+  {
+    "id": 7030,
+    "name": "vendor-portal",
+    "full_name": "meridian-freight/vendor-portal",
+    "html_url": "https://github.example.com/meridian-freight/vendor-portal",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": false,
+    "pushed_at": "2026-09-03T09:14:00Z",
+    "description": "Part of Vendor Portal.",
+    "topics": [
+      "app-vendor"
+    ]
+  },
+  {
+    "id": 7031,
+    "name": "contract-repository",
+    "full_name": "meridian-freight/contract-repository",
+    "html_url": "https://github.example.com/meridian-freight/contract-repository",
+    "default_branch": "main",
+    "language": "C#",
+    "archived": false,
+    "pushed_at": "2026-08-12T09:14:00Z",
+    "description": "Part of Contract Repository.",
+    "topics": [
+      "app-contracts"
+    ]
+  },
+  {
+    "id": 7032,
+    "name": "asset-tracking",
+    "full_name": "meridian-freight/asset-tracking",
+    "html_url": "https://github.example.com/meridian-freight/asset-tracking",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-08-25T09:14:00Z",
+    "description": "Part of Asset Tracking.",
+    "topics": [
+      "app-assets"
+    ]
+  },
+  {
+    "id": 7033,
+    "name": "maintenance-scheduler",
+    "full_name": "meridian-freight/maintenance-scheduler",
+    "html_url": "https://github.example.com/meridian-freight/maintenance-scheduler",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-06T09:14:00Z",
+    "description": "Part of Maintenance Scheduler.",
+    "topics": [
+      "app-maint"
+    ]
+  },
+  {
+    "id": 7034,
+    "name": "fleet-inspection",
+    "full_name": "meridian-freight/fleet-inspection",
+    "html_url": "https://github.example.com/meridian-freight/fleet-inspection",
+    "default_branch": "main",
+    "language": "Kotlin",
+    "archived": false,
+    "pushed_at": "2026-08-14T09:14:00Z",
+    "description": "Part of Fleet Inspection.",
+    "topics": [
+      "app-inspect"
+    ]
+  },
+  {
+    "id": 7035,
+    "name": "compliance-reporting",
+    "full_name": "meridian-freight/compliance-reporting",
+    "html_url": "https://github.example.com/meridian-freight/compliance-reporting",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-09-14T09:14:00Z",
+    "description": "Part of Compliance Reporting.",
+    "topics": [
+      "app-compliance"
+    ]
+  },
+  {
+    "id": 7036,
+    "name": "safety-incidents",
+    "full_name": "meridian-freight/safety-incidents",
+    "html_url": "https://github.example.com/meridian-freight/safety-incidents",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": false,
+    "pushed_at": "2026-08-08T09:14:00Z",
+    "description": "Part of Safety Incident Tracker.",
+    "topics": [
+      "app-safety"
+    ]
+  },
+  {
+    "id": 7037,
+    "name": "dock-scheduler",
+    "full_name": "meridian-freight/dock-scheduler",
+    "html_url": "https://github.example.com/meridian-freight/dock-scheduler",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-07-24T09:14:00Z",
+    "description": "Part of Dock Scheduler.",
+    "topics": [
+      "app-dock"
+    ]
+  },
+  {
+    "id": 7038,
+    "name": "load-planner",
+    "full_name": "meridian-freight/load-planner",
+    "html_url": "https://github.example.com/meridian-freight/load-planner",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-08-31T09:14:00Z",
+    "description": "Part of Load Planner.",
+    "topics": [
+      "app-loadplan"
+    ]
+  },
+  {
+    "id": 7039,
+    "name": "shipment-tracking-api",
+    "full_name": "meridian-freight/shipment-tracking-api",
+    "html_url": "https://github.example.com/meridian-freight/shipment-tracking-api",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-20T09:14:00Z",
+    "description": "Part of Shipment Tracking API.",
+    "topics": [
+      "app-tracking"
+    ]
+  },
+  {
+    "id": 7040,
+    "name": "notification-service",
+    "full_name": "meridian-freight/notification-service",
+    "html_url": "https://github.example.com/meridian-freight/notification-service",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-07T09:14:00Z",
+    "description": "Part of Notification Service.",
+    "topics": [
+      "app-notify"
+    ]
+  },
+  {
+    "id": 7041,
+    "name": "identity-broker",
+    "full_name": "meridian-freight/identity-broker",
+    "html_url": "https://github.example.com/meridian-freight/identity-broker",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": false,
+    "pushed_at": "2026-09-15T09:14:00Z",
+    "description": "Part of Identity Broker.",
+    "topics": [
+      "app-idbroker"
+    ]
+  },
+  {
+    "id": 7042,
+    "name": "api-gateway-config",
+    "full_name": "meridian-freight/api-gateway-config",
+    "html_url": "https://github.example.com/meridian-freight/api-gateway-config",
+    "default_branch": "main",
+    "language": "HCL",
+    "archived": false,
+    "pushed_at": "2026-09-19T09:14:00Z",
+    "description": "Part of API Gateway.",
+    "topics": [
+      "app-apigw"
+    ]
+  },
+  {
+    "id": 7043,
+    "name": "datalake-ingest",
+    "full_name": "meridian-freight/datalake-ingest",
+    "html_url": "https://github.example.com/meridian-freight/datalake-ingest",
+    "default_branch": "main",
+    "language": "Scala",
+    "archived": false,
+    "pushed_at": "2026-09-12T09:14:00Z",
+    "description": "Part of Data Lake Ingest.",
+    "topics": [
+      "app-datalake"
+    ]
+  },
+  {
+    "id": 7044,
+    "name": "bi-reports",
+    "full_name": "meridian-freight/bi-reports",
+    "html_url": "https://github.example.com/meridian-freight/bi-reports",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-06-30T09:14:00Z",
+    "description": "Part of BI Reporting.",
+    "topics": [
+      "app-bi"
+    ]
+  },
+  {
+    "id": 7045,
+    "name": "forecasting-models",
+    "full_name": "meridian-freight/forecasting-models",
+    "html_url": "https://github.example.com/meridian-freight/forecasting-models",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-08-05T09:14:00Z",
+    "description": "Part of Forecasting Models.",
+    "topics": [
+      "app-forecast"
+    ]
+  },
+  {
+    "id": 7046,
+    "name": "pricing-analytics",
+    "full_name": "meridian-freight/pricing-analytics",
+    "html_url": "https://github.example.com/meridian-freight/pricing-analytics",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-09-02T09:14:00Z",
+    "description": "Part of Pricing Analytics.",
+    "topics": [
+      "app-pricing"
+    ]
+  },
+  {
+    "id": 7047,
+    "name": "partner-sftp-config",
+    "full_name": "meridian-freight/partner-sftp-config",
+    "html_url": "https://github.example.com/meridian-freight/partner-sftp-config",
+    "default_branch": "main",
+    "language": "Shell",
+    "archived": false,
+    "pushed_at": "2026-04-11T09:14:00Z",
+    "description": "Part of Partner SFTP.",
+    "topics": [
+      "app-sftp"
+    ]
+  },
+  {
+    "id": 7048,
+    "name": "document-imaging",
+    "full_name": "meridian-freight/document-imaging",
+    "html_url": "https://github.example.com/meridian-freight/document-imaging",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-07-08T09:14:00Z",
+    "description": "Part of Document Imaging.",
+    "topics": [
+      "app-imaging"
+    ]
+  },
+  {
+    "id": 7049,
+    "name": "brokerage-match",
+    "full_name": "meridian-freight/brokerage-match",
+    "html_url": "https://github.example.com/meridian-freight/brokerage-match",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-09-17T09:14:00Z",
+    "description": "Part of Brokerage Match.",
+    "topics": [
+      "app-brokerage"
+    ]
+  },
+  {
+    "id": 7050,
+    "name": "emissions-reporting",
+    "full_name": "meridian-freight/emissions-reporting",
+    "html_url": "https://github.example.com/meridian-freight/emissions-reporting",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-08-22T09:14:00Z",
+    "description": "Part of Emissions Reporting.",
+    "topics": [
+      "app-greenmile"
+    ]
+  },
+  {
+    "id": 7051,
+    "name": "quote-widget",
+    "full_name": "meridian-freight/quote-widget",
+    "html_url": "https://github.example.com/meridian-freight/quote-widget",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": false,
+    "pushed_at": "2026-09-09T09:14:00Z",
+    "description": "Part of Quote Widget.",
+    "topics": [
+      "app-quoteweb"
+    ]
+  },
+  {
+    "id": 7052,
+    "name": "scanhub",
+    "full_name": "meridian-freight/scanhub",
+    "html_url": "https://github.example.com/meridian-freight/scanhub",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-18T09:14:00Z",
+    "description": "Part of ScanHub.",
+    "topics": [
+      "app-scanhub"
+    ]
+  },
+  {
+    "id": 7053,
+    "name": "scanhub-drivers",
+    "full_name": "meridian-freight/scanhub-drivers",
+    "html_url": "https://github.example.com/meridian-freight/scanhub-drivers",
+    "default_branch": "main",
+    "language": "C",
+    "archived": false,
+    "pushed_at": "2026-08-29T09:14:00Z",
+    "description": "Part of ScanHub.",
+    "topics": [
+      "app-scanhub"
+    ]
+  },
+  {
+    "id": 7054,
+    "name": "flowmon",
+    "full_name": "meridian-freight/flowmon",
+    "html_url": "https://github.example.com/meridian-freight/flowmon",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-13T09:14:00Z",
+    "description": "Part of FlowMon.",
+    "topics": [
+      "app-flowmon"
+    ]
+  },
+  {
+    "id": 7055,
+    "name": "meridian-terraform-modules",
+    "full_name": "meridian-freight/meridian-terraform-modules",
+    "html_url": "https://github.example.com/meridian-freight/meridian-terraform-modules",
+    "default_branch": "main",
+    "language": "HCL",
+    "archived": false,
+    "pushed_at": "2026-09-16T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7056,
+    "name": "eng-handbook",
+    "full_name": "meridian-freight/eng-handbook",
+    "html_url": "https://github.example.com/meridian-freight/eng-handbook",
+    "default_branch": "main",
+    "language": "Markdown",
+    "archived": false,
+    "pushed_at": "2026-09-11T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7057,
+    "name": "hackday-2025-lanegame",
+    "full_name": "meridian-freight/hackday-2025-lanegame",
+    "html_url": "https://github.example.com/meridian-freight/hackday-2025-lanegame",
+    "default_branch": "main",
+    "language": "JavaScript",
+    "archived": true,
+    "pushed_at": "2025-11-14T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7058,
+    "name": "hackday-2026-dispatchbot",
+    "full_name": "meridian-freight/hackday-2026-dispatchbot",
+    "html_url": "https://github.example.com/meridian-freight/hackday-2026-dispatchbot",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": true,
+    "pushed_at": "2026-03-02T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7059,
+    "name": "spike-graphql-federation",
+    "full_name": "meridian-freight/spike-graphql-federation",
+    "html_url": "https://github.example.com/meridian-freight/spike-graphql-federation",
+    "default_branch": "main",
+    "language": "TypeScript",
+    "archived": true,
+    "pushed_at": "2025-08-19T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7060,
+    "name": "spike-rust-telemetry",
+    "full_name": "meridian-freight/spike-rust-telemetry",
+    "html_url": "https://github.example.com/meridian-freight/spike-rust-telemetry",
+    "default_branch": "main",
+    "language": "Rust",
+    "archived": true,
+    "pushed_at": "2026-01-27T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7061,
+    "name": "jenkins-shared-library",
+    "full_name": "meridian-freight/jenkins-shared-library",
+    "html_url": "https://github.example.com/meridian-freight/jenkins-shared-library",
+    "default_branch": "main",
+    "language": "Groovy",
+    "archived": false,
+    "pushed_at": "2026-09-10T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7062,
+    "name": "archived-legacy-portal",
+    "full_name": "meridian-freight/archived-legacy-portal",
+    "html_url": "https://github.example.com/meridian-freight/archived-legacy-portal",
+    "default_branch": "main",
+    "language": "PHP",
+    "archived": true,
+    "pushed_at": "2023-06-30T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7063,
+    "name": "dotfiles-platform-team",
+    "full_name": "meridian-freight/dotfiles-platform-team",
+    "html_url": "https://github.example.com/meridian-freight/dotfiles-platform-team",
+    "default_branch": "main",
+    "language": "Shell",
+    "archived": false,
+    "pushed_at": "2026-05-04T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7064,
+    "name": "ml-notebooks-scratch",
+    "full_name": "meridian-freight/ml-notebooks-scratch",
+    "html_url": "https://github.example.com/meridian-freight/ml-notebooks-scratch",
+    "default_branch": "main",
+    "language": "Jupyter",
+    "archived": false,
+    "pushed_at": "2026-08-18T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7065,
+    "name": "vendor-poc-tms",
+    "full_name": "meridian-freight/vendor-poc-tms",
+    "html_url": "https://github.example.com/meridian-freight/vendor-poc-tms",
+    "default_branch": "main",
+    "language": "Java",
+    "archived": true,
+    "pushed_at": "2024-09-12T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7066,
+    "name": "interview-exercises",
+    "full_name": "meridian-freight/interview-exercises",
+    "html_url": "https://github.example.com/meridian-freight/interview-exercises",
+    "default_branch": "main",
+    "language": "Python",
+    "archived": false,
+    "pushed_at": "2026-02-14T09:14:00Z",
+    "description": "",
+    "topics": []
+  },
+  {
+    "id": 7067,
+    "name": "meridian-platform",
+    "full_name": "meridian-freight/meridian-platform",
+    "html_url": "https://github.example.com/meridian-freight/meridian-platform",
+    "default_branch": "main",
+    "language": "Go",
+    "archived": false,
+    "pushed_at": "2026-09-20T16:40:00Z",
+    "description": "Monorepo: shared services and libraries.",
+    "topics": [
+      "monorepo"
+    ],
+    "subprojects": [
+      {
+        "path": "/services/notify",
+        "hint": "notify"
+      },
+      {
+        "path": "/services/tracking",
+        "hint": "tracking"
+      },
+      {
+        "path": "/services/dock",
+        "hint": "dock"
+      },
+      {
+        "path": "/libs/common-auth",
+        "hint": "idbroker"
+      },
+      {
+        "path": "/libs/freight-model",
+        "hint": null
+      }
+    ]
+  }
+]

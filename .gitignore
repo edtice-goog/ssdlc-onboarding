@@ -1,0 +1,20 @@
+# local database instances
+*.db
+*.sqlite
+*.sqlite3
+
+# reparenting and packet archives written at runtime
+archive/
+artifacts/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

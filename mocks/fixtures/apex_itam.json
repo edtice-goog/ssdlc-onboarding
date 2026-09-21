@@ -1,0 +1,312 @@
+[
+  {
+    "asset_id": "AX-0501",
+    "asset_type": "Application",
+    "title": "PLM Suite",
+    "summary": "Product lifecycle management for trailer and container configurations.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "H. Okafor",
+    "delivery_team": "Platform Engineering"
+  },
+  {
+    "asset_id": "AX-0502",
+    "asset_type": "Application",
+    "title": "Billing Platform",
+    "summary": "Freight invoicing, rating and settlement.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "R. Castellanos-Ruiz",
+    "delivery_team": "Revenue Systems"
+  },
+  {
+    "asset_id": "AX-0503",
+    "asset_type": "Application",
+    "title": "Freight Quote Engine",
+    "summary": "Real-time rate quoting for web and partner channels.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "R. Castellanos",
+    "delivery_team": "Revenue Systems"
+  },
+  {
+    "asset_id": "AX-0504",
+    "asset_type": "Application",
+    "title": "Customer Portal",
+    "summary": "Customer-facing shipment booking and tracking.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "M. Lindqvist",
+    "delivery_team": "Digital Channels"
+  },
+  {
+    "asset_id": "AX-0505",
+    "asset_type": "Application",
+    "title": "Driver Mobile App",
+    "summary": "iOS/Android application for drivers: dispatch, POD capture, hours of service.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "D. Achebe",
+    "delivery_team": "Mobile Engineering"
+  },
+  {
+    "asset_id": "AX-0506",
+    "asset_type": "Application",
+    "title": "Route Optimizer",
+    "summary": "Daily route and load assignment optimisation.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "D. Achebe",
+    "delivery_team": "Operations Research"
+  },
+  {
+    "asset_id": "AX-0507",
+    "asset_type": "Application",
+    "title": "Warehouse Management",
+    "summary": "Inventory, pick/pack and dock operations across 14 facilities.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "P. Nakamura",
+    "delivery_team": "Facilities IT"
+  },
+  {
+    "asset_id": "AX-0508",
+    "asset_type": "Application",
+    "title": "Yard Management",
+    "summary": "Trailer positioning and gate control.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "P. Nakamura",
+    "delivery_team": "Warehouse Systems"
+  },
+  {
+    "asset_id": "AX-0509",
+    "asset_type": "Application",
+    "title": "Telematics Ingest",
+    "summary": "High-volume ingest of vehicle telemetry.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "D. Achebe",
+    "delivery_team": "Fleet Data"
+  },
+  {
+    "asset_id": "AX-0510",
+    "asset_type": "Application",
+    "title": "EDI Gateway",
+    "summary": "X12/EDIFACT translation for partner document exchange.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "S. Varga",
+    "delivery_team": "Integration Services"
+  },
+  {
+    "asset_id": "AX-0511",
+    "asset_type": "Application",
+    "title": "Customs Filing",
+    "summary": "Cross-border declarations and broker integration.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "S. Varga",
+    "delivery_team": "Integration Services"
+  },
+  {
+    "asset_id": "AX-0512",
+    "asset_type": "Application",
+    "title": "Rate Card Service",
+    "summary": "Contract rate storage and lookup.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "R. Castellanos",
+    "delivery_team": "Revenue Systems"
+  },
+  {
+    "asset_id": "AX-0513",
+    "asset_type": "Application",
+    "title": "Payment Gateway Adapter",
+    "summary": "Card and ACH processing integration.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "R. Castellanos",
+    "delivery_team": "Revenue Systems"
+  },
+  {
+    "asset_id": "AX-0514",
+    "asset_type": "Application",
+    "title": "HR Portal",
+    "summary": "Employee self-service.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "K. Sorensen",
+    "delivery_team": "Corporate Systems"
+  },
+  {
+    "asset_id": "AX-0515",
+    "asset_type": "Application",
+    "title": "Payroll Bridge",
+    "summary": "Transfers time and earnings to the payroll provider.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "K. Sorensen",
+    "delivery_team": "Corporate Systems"
+  },
+  {
+    "asset_id": "AX-0516",
+    "asset_type": "Application",
+    "title": "Vendor Portal",
+    "summary": "Supplier onboarding and document exchange.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "T. Mbeki",
+    "delivery_team": "Procurement IT"
+  },
+  {
+    "asset_id": "AX-0517",
+    "asset_type": "Application",
+    "title": "Contract Repository",
+    "summary": "Executed contract storage with clause search.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "Legal Operations",
+    "delivery_team": "Legal Technology"
+  },
+  {
+    "asset_id": "AX-0518",
+    "asset_type": "Application",
+    "title": "Maintenance Scheduler",
+    "summary": "Preventive maintenance planning.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "L. Boateng",
+    "delivery_team": "Fleet Data"
+  },
+  {
+    "asset_id": "AX-0519",
+    "asset_type": "Application",
+    "title": "Compliance Reporting",
+    "summary": "Regulatory reporting for hours of service and hazmat.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "N. Haddad",
+    "delivery_team": "Risk & Compliance"
+  },
+  {
+    "asset_id": "AX-0520",
+    "asset_type": "Application",
+    "title": "Safety Incident Tracker",
+    "summary": "Incident intake, investigation and corrective action.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "N. Haddad",
+    "delivery_team": "Corporate Systems"
+  },
+  {
+    "asset_id": "AX-0521",
+    "asset_type": "Application",
+    "title": "Shipment Tracking API",
+    "summary": "Public tracking API consumed by partners and the portal.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "M. Lindqvist",
+    "delivery_team": "Digital Channels"
+  },
+  {
+    "asset_id": "AX-0522",
+    "asset_type": "Application",
+    "title": "Identity Broker",
+    "summary": "SSO and workforce identity federation.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "J. Whitfield",
+    "delivery_team": "Platform Engineering"
+  },
+  {
+    "asset_id": "AX-0523",
+    "asset_type": "Application",
+    "title": "API Gateway",
+    "summary": "Edge routing, throttling and authentication.",
+    "status": "Live",
+    "tier": "Critical",
+    "steward": "J. Whitfield",
+    "delivery_team": "Platform Engineering"
+  },
+  {
+    "asset_id": "AX-0524",
+    "asset_type": "Application",
+    "title": "Data Lake Ingest",
+    "summary": "Batch and streaming ingest into the analytics lake.",
+    "status": "Live",
+    "tier": "High",
+    "steward": "A. Ferreira",
+    "delivery_team": "Data Platform"
+  },
+  {
+    "asset_id": "AX-0525",
+    "asset_type": "Application",
+    "title": "Legacy Claims (Notes)",
+    "summary": "Lotus Notes claims intake. Replacement in flight.",
+    "status": "Decommissioning",
+    "tier": "Moderate",
+    "steward": "N. Haddad",
+    "delivery_team": "Legacy Support"
+  },
+  {
+    "asset_id": "AX-0526",
+    "asset_type": "Application",
+    "title": "Legacy Rate Tool (Notes)",
+    "summary": "Lotus Notes rate calculator.",
+    "status": "Decommissioning",
+    "tier": "Moderate",
+    "steward": "R. Castellanos",
+    "delivery_team": "Legacy Support"
+  },
+  {
+    "asset_id": "AX-0527",
+    "asset_type": "Application",
+    "title": "Legacy Fleet Notes",
+    "summary": "Lotus Notes maintenance notebook.",
+    "status": "Decommissioning",
+    "tier": "Moderate",
+    "steward": "L. Boateng",
+    "delivery_team": "Legacy Support"
+  },
+  {
+    "asset_id": "AX-0528",
+    "asset_type": "Application",
+    "title": "Tariff Classification",
+    "summary": "HS code assignment assistant used by the customs team.",
+    "status": "Live",
+    "tier": "Moderate",
+    "steward": "Unassigned",
+    "delivery_team": "Unassigned"
+  },
+  {
+    "asset_id": "AX-0529",
+    "asset_type": "Application",
+    "title": "Carrier Scorecard",
+    "summary": "Carrier performance scoring.",
+    "status": "Live",
+    "tier": "Moderate",
+    "steward": "Unassigned",
+    "delivery_team": "Unassigned"
+  },
+  {
+    "asset_id": "AX-0530",
+    "asset_type": "Application",
+    "title": "Lane Profitability",
+    "summary": "Duplicate of Pricing Analytics under a different name.",
+    "status": "Live",
+    "tier": "Moderate",
+    "steward": "Unassigned",
+    "delivery_team": "Unassigned"
+  },
+  {
+    "asset_id": "AX-0531",
+    "asset_type": "Application",
+    "title": "Depot Wi-Fi Portal",
+    "summary": "Guest network captive portal at depots.",
+    "status": "Live",
+    "tier": "Moderate",
+    "steward": "Unassigned",
+    "delivery_team": "Unassigned"
+  }
+]

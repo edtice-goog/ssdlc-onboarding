@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SSDLC Onboarding</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --panel: #fff; --ink: #1d1c1a; --muted: #6b6862;
+    --line: #e3e0da; --accent: #3a5f8a; --warn: #9a5b1e; --bad: #8f3428;
+    --ok: #3f6b4a; --chip: #f1efea;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17181a; --panel: #1f2023; --ink: #e8e6e3; --muted: #97938c;
+      --line: #32343a; --accent: #7fa9d8; --warn: #d9a05b; --bad: #d98a7e;
+      --ok: #86b894; --chip: #2a2c31;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  header { border-bottom:1px solid var(--line); background:var(--panel);
+           position:sticky; top:0; z-index:10; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
+  header .wrap { display:flex; align-items:center; gap:22px; height:52px; }
+  h1 { font-size:15px; margin:0; font-weight:600; letter-spacing:-.01em; white-space:nowrap; }
+  h1 span { color:var(--muted); font-weight:400; }
+  nav { display:flex; gap:2px; flex-wrap:wrap; }
+  nav button { background:none; border:0; padding:6px 11px; border-radius:6px;
+               color:var(--muted); font:inherit; font-size:14px; cursor:pointer; }
+  nav button:hover { background:var(--chip); color:var(--ink); }
+  nav button.on { background:var(--chip); color:var(--ink); font-weight:550; }
+  main { padding:24px 0 60px; }
+  h2 { font-size:19px; margin:0 0 4px; font-weight:600; letter-spacing:-.01em; }
+  .lede { color:var(--muted); margin:0 0 20px; max-width:66ch; font-size:14px; }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:9px;
+          padding:15px 17px; }
+  .card h3 { margin:0 0 10px; font-size:11px; text-transform:uppercase;
+             letter-spacing:.07em; color:var(--muted); font-weight:600; }
+  .big { font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1.1; }
+  .sub { color:var(--muted); font-size:13px; margin-top:5px; }
+  .bar { display:flex; height:7px; border-radius:4px; overflow:hidden; margin:11px 0 7px;
+         background:var(--chip); }
+  .bar i { display:block; }
+  table { width:100%; border-collapse:collapse; background:var(--panel);
+          border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+  th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+       color:var(--muted); padding:9px 12px; border-bottom:1px solid var(--line);
+       font-weight:600; white-space:nowrap; }
+  td { padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top;
+       font-size:14px; }
+  tr:last-child td { border-bottom:0; }
+  tbody tr:hover { background:var(--chip); }
+  .mono { font-family:var(--mono); font-size:12.5px; }
+  .muted { color:var(--muted); }
+  .chip { display:inline-block; padding:1px 7px; border-radius:20px; background:var(--chip);
+          font-size:11.5px; color:var(--muted); white-space:nowrap; }
+  .chip.ok{color:var(--ok)} .chip.warn{color:var(--warn)} .chip.bad{color:var(--bad)}
+  .chip.accent{color:var(--accent)}
+  a { color:var(--accent); text-decoration:none; cursor:pointer; }
+  a:hover { text-decoration:underline; }
+  .row { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+  select,input { font:inherit; font-size:14px; padding:6px 9px; border:1px solid var(--line);
+                 border-radius:6px; background:var(--panel); color:var(--ink); }
+  .note { border-left:3px solid var(--accent); padding:9px 14px; margin:16px 0;
+          background:var(--panel); border-radius:0 7px 7px 0; font-size:14px;
+          color:var(--muted); }
+  .note b { color:var(--ink); font-weight:600; }
+  pre { background:var(--panel); border:1px solid var(--line); border-radius:9px;
+        padding:14px; overflow:auto; font-family:var(--mono); font-size:12.5px;
+        line-height:1.55; max-height:460px; white-space:pre-wrap; }
+  .narrative { background:var(--panel); border:1px solid var(--line); border-radius:9px;
+               padding:17px 19px; line-height:1.7; }
+  .demo { background:var(--warn); color:#fff; font-size:11px; padding:2px 9px;
+          border-radius:20px; font-weight:600; letter-spacing:.03em; }
+  .empty { padding:34px; text-align:center; color:var(--muted); background:var(--panel);
+           border:1px solid var(--line); border-radius:9px; font-size:14px; }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>SSDLC Onboarding <span>&amp; Tracking</span></h1>
+  <nav id="nav"></nav>
+  <span style="flex:1"></span>
+  <span class="demo" id="demoflag" hidden>SIMULATED DATA</span>
+</div></header>
+<main><div class="wrap" id="view"></div></main>
+
+<script>
+const API = "/api/v1";
+const $ = (h) => { const t=document.createElement("template"); t.innerHTML=h.trim(); return t.content; };
+const esc = (s) => String(s ?? "").replace(/[<>&"]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+const get = (p) => fetch(API+p).then(r => r.json());
+const post = (p,b) => fetch(API+p,{method:"POST",headers:{"Content-Type":"application/json"},
+                                  body:JSON.stringify(b)}).then(r=>r.json());
+
+const PAGES = [
+  ["coverage","Coverage"], ["applications","Applications"], ["sources","Sources"],
+  ["repositories","Repositories"], ["artifacts","Artifacts"],
+  ["orphans","Orphans"], ["decisions","Decisions"], ["packets","Packets"], ["audit","Audit"],
+];
+
+function nav(active) {
+  const n = document.getElementById("nav"); n.innerHTML = "";
+  for (const [id,label] of PAGES) {
+    const b = document.createElement("button");
+    b.textContent = label; b.className = id===active ? "on" : "";
+    b.onclick = () => go(id);
+    n.append(b);
+  }
+}
+function go(page, arg) { location.hash = arg ? `${page}/${arg}` : page; }
+function meter(parts) {
+  const total = parts.reduce((a,p)=>a+p[0],0) || 1;
+  return `<div class="bar">${parts.map(([v,c])=>
+    `<i style="width:${v/total*100}%;background:${c}"></i>`).join("")}</div>`;
+}
+const C = { ok:"var(--ok)", warn:"var(--warn)", bad:"var(--bad)", chip:"var(--chip)",
+            accent:"var(--accent)" };
+
+// ------------------------------------------------------------------ pages
+
+async function coverage(v) {
+  const c = await get("/coverage/summary");
+  const a=c.applications, i=c.inventory, code=c.code, b=c.build;
+  v.innerHTML = `
+    <h2>Coverage</h2>
+    <p class="lede">What exists, what has been decided about, and what has not.
+      <b>Unknown</b> and <b>dispositioned</b> are shown separately throughout &mdash; a gap
+      nobody has looked at is not the same as one that was looked at and accepted.</p>
+    <div class="grid">
+      <div class="card"><h3>Applications</h3><div class="big">${a.total}</div>
+        ${meter([[a.by_origin.federated,C.accent],[a.by_origin.manual,C.ok],[a.by_origin.inferred,C.warn]])}
+        <div class="sub">${a.by_origin.federated} federated &middot; ${a.by_origin.manual} manual &middot;
+          <b style="color:var(--warn)">${a.by_origin.inferred} inferred</b></div></div>
+      <div class="card"><h3>Inventory records</h3><div class="big">${i.records_total}</div>
+        ${meter([[i.managed,C.ok],[i.rejected,C.chip],[i.undecided,C.warn]])}
+        <div class="sub">${i.managed} managed &middot; ${i.rejected} rejected &middot;
+          ${i.undecided} undecided${i.stale_decisions?` &middot; <b style="color:var(--warn)">${i.stale_decisions} stale</b>`:""}</div></div>
+      <div class="card"><h3>Repositories</h3><div class="big">${code.repositories_total}</div>
+        ${meter([[code.mapped,C.ok],[code.unmapped,C.warn]])}
+        <div class="sub">${code.mapped} mapped &middot; ${code.unmapped} with no declared home</div></div>
+      <div class="card"><h3>Build artifacts</h3><div class="big">${b.artifacts_total}</div>
+        ${meter([[b.governed,C.ok],[b.ungoverned,C.bad]])}
+        <div class="sub">${b.governed} governed &middot;
+          <b style="color:var(--bad)">${b.ungoverned} ship ungoverned</b></div></div>
+    </div>
+    ${b.ungoverned ? `<div class="note"><b>${b.ungoverned} artifacts ship with nothing
+      governing them.</b> Each has a recent build and no managed entity, so no SSDLC
+      applies to it. <a onclick="go('orphans','build_artifact')">Review them</a>.</div>` : ""}
+    <h2 style="margin-top:28px">Onboarding</h2>
+    <p class="lede">Refinement is always optional and always later, so most applications
+      resting at an early state is expected rather than alarming.</p>
+    <table><thead><tr><th>State</th><th style="width:75%">Applications</th></tr></thead><tbody>
+    ${["discovered","in_scope","decomposed","bound","instrumented","observed"].map(s=>{
+      const n=a.by_onboarding_state[s]||0;
+      return `<tr><td>${s.replace("_"," ")}</td><td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="flex:1;max-width:300px">${meter([[n,C.accent],[a.total-n,C.chip]])}</div>
+          <span class="mono">${n}</span></div></td></tr>`;}).join("")}
+    </tbody></table>
+    <h2 style="margin-top:28px">Sources</h2>
+    <p class="lede">Staleness is shown as a fact, never as an alarm. One registration per
+      system <em>per role</em> &mdash; the same host serving code and builds appears twice.</p>
+    <table><thead><tr><th>Source</th><th>Role</th><th>Kind</th><th>Owner</th>
+      <th>Records</th><th>Last sync</th><th>Age</th></tr></thead><tbody>
+    ${c.sources.map(s=>`<tr>
+      <td>${esc(s.name)}${s.is_system?' <span class="chip">system</span>':""}</td>
+      <td><span class="chip accent">${s.role}</span></td>
+      <td class="mono muted">${esc(s.kind)}</td>
+      <td class="muted">${esc(s.owner_team||"")}</td>
+      <td class="mono">${s.last_sync_record_count ?? ""}</td>
+      <td class="mono muted">${(s.last_sync_at||"").slice(0,10)||"never"}</td>
+      <td class="muted">${s.staleness_days==null?"":
+        `${s.staleness_days}d${s.expected_cadence_days?` <span class="muted">/ ${s.expected_cadence_days}d expected</span>`:""}`}</td>
+      </tr>`).join("")}</tbody></table>`;
+}
+
+async function applications(v) {
+  const r = await get("/applications?limit=500");
+  v.innerHTML = `<h2>Applications</h2>
+    <p class="lede">The golden record. IDs are ours, stable, and never reused &mdash; a CMDB
+      record being re-keyed or deleted does not orphan accumulated evidence.</p>
+    <div class="row"><input id="q" placeholder="Filter by name or handle" style="width:250px">
+      <select id="origin"><option value="">All origins</option>
+        <option value="federated">federated</option><option value="manual">manual</option>
+        <option value="inferred">inferred &mdash; detected omissions</option></select></div>
+    <div id="rows"></div>`;
+  const draw = () => {
+    const q=document.getElementById("q").value.toLowerCase();
+    const o=document.getElementById("origin").value;
+    const items = r.items.filter(a =>
+      (!o||a.origin===o) && (!q || (a.name+a.handle).toLowerCase().includes(q)));
+    document.getElementById("rows").innerHTML = !items.length ? `<div class="empty">No matches.</div>` :
+      `<table><thead><tr><th>ID</th><th>Name</th><th>Origin</th><th>Criticality</th>
+        <th>Owner</th><th>Sources</th><th>Entities</th><th>Repos</th><th>State</th></tr></thead><tbody>
+      ${items.map(a=>`<tr>
+        <td class="mono"><a onclick="go('application','${a.id}')">${a.handle}</a></td>
+        <td>${esc(a.name)}${a.has_attribute_conflict?
+             ' <span class="chip warn" title="Sources disagree on a field">conflict</span>':""}</td>
+        <td><span class="chip ${a.origin==="inferred"?"warn":""}">${a.origin}</span></td>
+        <td class="muted">${esc(a.criticality||"")}</td>
+        <td class="muted">${esc(a.engineering_owner||"")}</td>
+        <td class="mono">${a.source_count}</td><td class="mono">${a.managed_entity_count}</td>
+        <td class="mono">${a.repository_count}</td>
+        <td class="muted">${a.onboarding_state.replace("_"," ")}</td></tr>`).join("")}
+      </tbody></table>`;
+  };
+  document.getElementById("q").oninput = draw;
+  document.getElementById("origin").onchange = draw;
+  draw();
+}
+
+async function application(v, id) {
+  const [a, lin] = await Promise.all([get("/applications/"+id), get(`/applications/${id}/lineage`)]);
+  if (a.code) return v.innerHTML = `<div class="empty">${esc(a.message)}</div>`;
+  v.innerHTML = `
+    <div class="row"><a onclick="go('applications')">&larr; Applications</a></div>
+    <h2>${a.handle} &nbsp;${esc(a.name)}</h2>
+    <p class="lede">${esc(a.description||"")}</p>
+    <div class="row">
+      <span class="chip ${a.origin==="inferred"?"warn":"accent"}">${a.origin}</span>
+      <span class="chip">${a.onboarding_state.replace("_"," ")}</span>
+      ${a.criticality?`<span class="chip">${esc(a.criticality)}</span>`:""}
+      ${a.engineering_owner?`<span class="chip">${esc(a.engineering_owner)}</span>`:""}</div>
+
+    <h2 style="font-size:15px;margin-top:22px">Lineage</h2>
+    <p class="lede">How this ID came to exist &mdash; a projection of the audit log, not a debug view.</p>
+    <div class="narrative">${esc(lin.narrative)}</div>
+
+    <h2 style="font-size:15px;margin-top:26px">Federated attributes</h2>
+    <p class="lede">Which source won each field, and why. Conflicts surface rather than being
+      silently overwritten.</p>
+    ${a.attribute_resolution.length ? `<table><thead><tr><th>Field</th><th>Resolved</th>
+      <th>Winner</th><th>Reason</th><th>Competing values</th></tr></thead><tbody>
+      ${a.attribute_resolution.map(r=>`<tr>
+        <td>${r.field.replace(/_/g," ")}</td><td><b>${esc(r.resolved_value)}</b></td>
+        <td class="muted">${esc(r.winning_source_name||"")}</td>
+        <td><span class="chip ${r.conflict?"warn":""}">${r.reason.replace(/_/g," ")}</span></td>
+        <td class="muted">${r.competing_values.map(c=>
+          `${esc(c.source_name)}: ${esc(c.value)}`).join(" &nbsp;/&nbsp; ")}</td>
+      </tr>`).join("")}</tbody></table>`
+      : `<div class="empty">No linked inventory records.</div>`}
+
+    <h2 style="font-size:15px;margin-top:26px">Managed entities</h2>
+    <p class="lede">The governed unit &mdash; each carries one SSDLC process instance. The
+      rationale is required: it is the record of why these things are managed together.</p>
+    <table><thead><tr><th>Name</th><th>Kind</th><th>Artifacts</th><th>Repos</th>
+      <th style="width:48%">Rationale</th></tr></thead><tbody>
+    ${a.managed_entities.map(e=>`<tr>
+      <td>${esc(e.name)}${e.is_default?' <span class="chip">default</span>':""}</td>
+      <td class="muted">${esc(e.kind||"")}</td><td class="mono">${e.artifact_count}</td>
+      <td class="mono">${e.repository_count}</td>
+      <td class="muted">${esc(e.rationale)}</td></tr>`).join("")}</tbody></table>
+
+    ${a.source_links.length?`<h2 style="font-size:15px;margin-top:26px">Source records</h2>
+    <table><thead><tr><th>Source</th><th>External ID</th><th>Status</th></tr></thead><tbody>
+    ${a.source_links.map(l=>`<tr><td>${esc(l.source_name)}</td>
+      <td class="mono">${esc(l.external_id)}</td>
+      <td>${l.absent_since?'<span class="chip bad">absent</span>':'<span class="chip ok">live</span>'}</td>
+      </tr>`).join("")}</tbody></table>`:""}`;
+}
+
+async function sources(v) {
+  const s = await get("/sources");
+  v.innerHTML = `<h2>Sources</h2>
+    <p class="lede">Every connected system, registered once <em>per role</em>. A host serving
+      both repositories and builds is two registrations under two ids &mdash; so the teams that
+      own each can work without colliding. We hold no inventory credentials.</p>
+    <table><thead><tr><th>Name</th><th>Role</th><th>Kind</th><th>Owner team</th><th>Tier</th>
+      <th>Priority</th><th>Records</th><th>Last sync</th></tr></thead><tbody>
+    ${s.map(x=>`<tr>
+      <td>${esc(x.name)}${x.is_system?' <span class="chip">system</span>':""}</td>
+      <td><span class="chip accent">${x.role}</span></td>
+      <td class="mono muted">${esc(x.kind)}</td><td class="muted">${esc(x.owner_team||"")}</td>
+      <td class="mono muted">${esc(x.tier_selection||"")}</td>
+      <td class="mono">${x.priority??""}</td><td class="mono">${x.record_count}</td>
+      <td class="muted">${x.last_sync_at?`${x.last_sync_at.slice(0,10)}
+        <span class="chip">${x.last_sync_method}</span>
+        <span class="chip ${x.last_sync_completeness==="partial"?"warn":""}">${x.last_sync_completeness}</span>`
+        :"never"}</td></tr>`).join("")}</tbody></table>
+    <div class="note"><b>The Internal Register is a real source.</b> Applications and managed
+      entities belong to it rather than to a null &mdash; so every entity resolves to a source
+      by the same query, which matters most for a skill reasoning over the API.</div>`;
+}
+
+async function repositories(v) {
+  const r = await get("/repositories?limit=500");
+  v.innerHTML = `<h2>Repositories</h2>
+    <p class="lede">Subtree scopes matter: without them the finest grain in an SVN repository
+      is the repository itself, which maps to five applications at once and is useless.</p>
+    <div class="row"><select id="f"><option value="">All</option>
+      <option value="0">Unmapped only</option><option value="1">Mapped only</option></select></div>
+    <div id="rows"></div>`;
+  const draw = () => {
+    const f=document.getElementById("f").value;
+    const items=r.items.filter(x=>f===""||String(+x.mapped)===f);
+    document.getElementById("rows").innerHTML = `<table><thead><tr><th>Repository</th>
+      <th>Source</th><th>Language</th><th>Last commit</th><th>Scopes</th>
+      <th>Application</th></tr></thead><tbody>
+      ${items.map(x=>`<tr><td>${esc(x.name)}
+        ${x.archived?' <span class="chip">archived</span>':""}</td>
+        <td class="muted">${esc(x.source_name)}</td>
+        <td class="muted">${esc(x.primary_language||"")}</td>
+        <td class="mono muted">${(x.last_commit_at||"").slice(0,10)}</td>
+        <td class="mono">${x.scope_count||""}</td>
+        <td>${x.application_handle?`<a onclick="go('application','${x.application_id}')">
+          ${x.application_handle}</a>`:'<span class="chip warn">no declared home</span>'}</td>
+        </tr>`).join("")}</tbody></table>`;
+  };
+  document.getElementById("f").onchange = draw; draw();
+}
+
+async function artifacts(v) {
+  const r = await get("/build-artifacts?limit=500");
+  const un = r.items.filter(a=>!a.governed).length;
+  v.innerHTML = `<h2>Build artifacts</h2>
+    <p class="lede">An artifact is an identity, not an occurrence. Each resolves to exactly one
+      managed entity &mdash; its governing SSDLC &mdash; or it is shipping ungoverned.</p>
+    ${un?`<div class="note"><b>${un} ship with nothing governing them.</b></div>`:""}
+    <table><thead><tr><th>Coordinate</th><th>Type</th><th>Pipeline</th><th>Source</th>
+      <th>Governed by</th></tr></thead><tbody>
+    ${r.items.map(a=>`<tr><td class="mono">${esc(a.coordinate)}</td>
+      <td><span class="chip">${esc(a.artifact_type||"")}</span></td>
+      <td class="mono muted">${esc(a.pipeline_ref||"")}</td>
+      <td class="muted">${esc(a.source_name)}</td>
+      <td>${a.governed?`${esc(a.application_handle||"")} <span class="muted">/
+        ${esc(a.managed_entity_name)}</span>`:'<span class="chip bad">nothing</span>'}</td>
+      </tr>`).join("")}</tbody></table>`;
+}
+
+async function orphans(v, kind) {
+  kind = kind || "build_artifact";
+  const KINDS = [["build_artifact","Ungoverned artifacts"],["repository","Unmapped repositories"],
+                 ["inferred_application","Detected omissions"],["application","Inventory drift"]];
+  const r = await get(`/coverage/orphans/${kind}?include_dispositioned=true`);
+  v.innerHTML = `<h2>Orphans</h2>
+    <p class="lede">Things with no place in the model yet. Computed, never stored &mdash; and
+      dismissing one is a recorded decision with a reason, not a delete.</p>
+    <div class="row">${KINDS.map(([k,l])=>
+      `<button onclick="go('orphans','${k}')" style="background:${k===kind?"var(--chip)":"none"};
+        border:1px solid var(--line);border-radius:6px;padding:6px 11px;color:inherit;
+        font:inherit;font-size:14px;cursor:pointer">${l}</button>`).join("")}</div>
+    ${!r.items.length?`<div class="empty">None.</div>`:
+    `<div class="note">${esc(r.items[0].meaning)}</div>
+     <table><thead><tr><th>Name</th><th>Detail</th><th>Source</th><th>Last seen</th>
+      <th>Disposition</th></tr></thead><tbody>
+     ${r.items.map(o=>`<tr><td class="mono">${esc(o.display_name)}</td>
+       <td class="muted">${esc(o.detail||"")}</td>
+       <td class="muted">${esc(o.source_name||"")}</td>
+       <td class="mono muted">${(o.last_seen||"").slice(0,10)}</td>
+       <td>${o.disposition?`<span class="chip">${o.disposition.status}</span>
+         <div class="muted" style="font-size:12.5px">${esc(o.disposition.reason||"")}</div>`
+         :'<span class="chip warn">unreviewed</span>'}</td></tr>`).join("")}
+     </tbody></table>`}`;
+}
+
+async function decisions(v) {
+  const [d, stale] = await Promise.all([get("/decisions"), get("/decisions/stale-subjects")]);
+  v.innerHTML = `<h2>Decisions</h2>
+    <p class="lede">One rationale over many subjects. Ten applications decided out of scope for
+      the same reason are one decision, not ten &mdash; which is what keeps the audit trail readable.</p>
+    ${stale.length?`<div class="note"><b>${stale.length} subjects need re-review.</b> Their
+      decision is not invalid &mdash; a person decided it and the thing they decided about has
+      since moved. It keeps its effect until re-decided.
+      <table style="margin-top:11px"><thead><tr><th>Subject</th><th>Was</th><th>Changed</th>
+        <th>Original rationale</th></tr></thead><tbody>
+      ${stale.map(s=>`<tr><td>${esc(s.display_name)}</td>
+        <td><span class="chip">${s.disposition}</span></td>
+        <td class="mono muted">${(s.changed_fields||[]).join(", ")}</td>
+        <td class="muted">${esc(s.rationale)}</td></tr>`).join("")}</tbody></table></div>`:""}
+    <table><thead><tr><th>When</th><th>Kind</th><th>Disposition</th><th>Subjects</th>
+      <th style="width:44%">Rationale</th><th>By</th></tr></thead><tbody>
+    ${d.items.map(x=>`<tr><td class="mono muted">${x.decided_at.slice(0,10)}</td>
+      <td><span class="chip">${x.kind}</span></td>
+      <td><span class="chip ${x.disposition==="manage"?"ok":x.disposition==="reject"?"":"accent"}">
+        ${x.disposition}</span></td>
+      <td class="mono">${x.subject_count}${x.stale_subject_count?
+        ` <span class="chip warn">${x.stale_subject_count} stale</span>`:""}</td>
+      <td>${esc(x.rationale)}</td><td class="muted">${esc(x.decided_by)}</td></tr>`).join("")}
+    </tbody></table>`;
+}
+
+async function packets(v) {
+  const p = await get("/decision-packets");
+  v.innerHTML = `<h2>Decision packets</h2>
+    <p class="lede">Judgment over long lists goes to a Claude session, not a rules engine. We
+      export the candidates, a person reasons about them, and hands back decisions we diff and
+      apply. The export is the product surface: what comes back is bounded by what we put in.</p>
+    ${!p.length?`<div class="empty">No packets yet.</div>`:
+    `<table><thead><tr><th>Created</th><th>Subject</th><th>Rows</th><th>Status</th>
+      <th style="width:42%">Purpose</th><th>By</th></tr></thead><tbody>
+    ${p.map(x=>`<tr><td class="mono muted">${x.created_at.slice(0,10)}</td>
+      <td><span class="chip">${x.subject_type.replace(/_/g," ")}</span></td>
+      <td class="mono">${x.row_count}</td>
+      <td><span class="chip ${x.status==="applied"?"ok":"warn"}">${x.status}</span></td>
+      <td><a onclick="go('packet','${x.id}')">${esc(x.purpose)}</a></td>
+      <td class="muted">${esc(x.created_by)}</td></tr>`).join("")}</tbody></table>`}`;
+}
+
+async function packet(v, id) {
+  const [p, d] = await Promise.all([get("/decision-packets/"+id),
+                                    get(`/decision-packets/${id}/diff`)]);
+  v.innerHTML = `<div class="row"><a onclick="go('packets')">&larr; Packets</a></div>
+    <h2>${esc(p.purpose)}</h2>
+    <div class="row"><span class="chip">${p.row_count} candidates</span>
+      <span class="chip ${p.status==="applied"?"ok":"warn"}">${p.status}</span>
+      <span class="chip">${d.parsed_rows} decided</span>
+      ${d.undecided_keys.length?`<span class="chip warn">${d.undecided_keys.length} undecided</span>`:""}
+      <a href="${API}/decision-packets/${id}/export?format=markdown" download>Download prompt</a>
+      <a href="${API}/decision-packets/${id}/export?format=csv" download>CSV</a></div>
+    ${d.rationale_groups.length?`
+      <h2 style="font-size:15px;margin-top:22px">Rationale groups</h2>
+      <p class="lede">Each distinct rationale becomes one decision over many subjects.</p>
+      <table><thead><tr><th>Disposition</th><th>Subjects</th><th>Rationale</th></tr></thead><tbody>
+      ${d.rationale_groups.sort((a,b)=>b.subject_count-a.subject_count).map(g=>`<tr>
+        <td><span class="chip ${g.disposition==="manage"?"ok":""}">${g.disposition}</span></td>
+        <td class="mono">${g.subject_count}</td><td>${esc(g.rationale)}</td></tr>`).join("")}
+      </tbody></table>`:""}
+    <h2 style="font-size:15px;margin-top:26px">Generated prompt</h2>
+    <p class="lede">Paste this into a Claude session. The record_key column must survive unchanged;
+      rows left out come back as undecided, never as rejected.</p>
+    <pre>${esc(p.prompt_text)}</pre>`;
+}
+
+async function audit(v) {
+  const r = await get("/audit?limit=200");
+  v.innerHTML = `<h2>Audit</h2>
+    <p class="lede">Append-only. Every lineage narrative in the application is a projection of
+      this log.</p>
+    <table><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Subject</th>
+      <th style="width:38%">Detail</th></tr></thead><tbody>
+    ${r.items.map(e=>`<tr><td class="mono muted">${e.at.slice(0,16).replace("T"," ")}</td>
+      <td class="muted">${esc((e.actor||"").split("@")[0])}</td>
+      <td class="mono">${esc(e.action)}</td>
+      <td>${esc(e.display_name||"")}</td>
+      <td class="muted">${esc(e.after_text||"")}${e.rationale?
+        `<div style="font-size:12.5px;margin-top:2px">&ldquo;${esc(e.rationale)}&rdquo;</div>`:""}</td>
+      </tr>`).join("")}</tbody></table>`;
+}
+
+const ROUTES = {coverage, applications, application, sources, repositories, artifacts,
+                orphans, decisions, packets, packet, audit};
+
+async function render() {
+  const [page, arg] = (location.hash.slice(1) || "coverage").split("/");
+  const fn = ROUTES[page] || coverage;
+  nav(page === "application" ? "applications" : page === "packet" ? "packets" : page);
+  const v = document.getElementById("view");
+  v.innerHTML = `<div class="empty">Loading&hellip;</div>`;
+  try { await fn(v, arg); }
+  catch (e) { v.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+window.addEventListener("hashchange", render);
+get("/sources").then(s => {
+  document.getElementById("demoflag").hidden =
+    !s.some(x => /Meridian|ServiceNow|Apex/i.test(x.name || ""));
+});
+render();
+</script>
+</body>
+</html>

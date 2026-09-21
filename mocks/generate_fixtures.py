@@ -41,7 +41,7 @@ APPS = [
       "Product lifecycle management for trailer and container configurations.", apex=True),
     A("billing",    "Billing Platform",        "Tier 1", "Production", "R. Castellanos", "Revenue Systems",
       "Freight invoicing, rating and settlement.", apex=True,
-      dis={"criticality": "Critical", "business_owner": "R. Castellanos-Ruiz"}),
+      dis={"tier": "High", "steward": "R. Castellanos-Ruiz"}),
     A("quote",      "Freight Quote Engine",    "Tier 1", "Production", "R. Castellanos", "Revenue Systems",
       "Real-time rate quoting for web and partner channels.", apex=True),
     A("portal",     "Customer Portal",         "Tier 1", "Production", "M. Lindqvist", "Digital Channels",
@@ -52,7 +52,7 @@ APPS = [
       "Daily route and load assignment optimisation.", apex=True),
     A("wms",        "Warehouse Management",    "Tier 1", "Production", "P. Nakamura", "Warehouse Systems",
       "Inventory, pick/pack and dock operations across 14 facilities.", apex=True,
-      dis={"engineering_owner": "Facilities IT"}),
+      dis={"delivery_team": "Facilities IT"}),
     A("yard",       "Yard Management",         "Tier 2", "Production", "P. Nakamura", "Warehouse Systems",
       "Trailer positioning and gate control.", apex=True),
     A("telematics", "Telematics Ingest",       "Tier 2", "Production", "D. Achebe",   "Fleet Data",
@@ -61,7 +61,7 @@ APPS = [
       "X12/EDIFACT translation for partner document exchange.", apex=True),
     A("customs",    "Customs Filing",          "Tier 1", "Production", "S. Varga",    "Integration Services",
       "Cross-border declarations and broker integration.", apex=True,
-      dis={"criticality": "Tier 2"}),
+      dis={"tier": "Moderate"}),
     A("ratecard",   "Rate Card Service",       "Tier 2", "Production", "R. Castellanos", "Revenue Systems",
       "Contract rate storage and lookup.", apex=True),
     A("recon",      "Invoice Reconciliation",  "Tier 2", "Production", "R. Castellanos", "Revenue Systems",
@@ -86,7 +86,7 @@ APPS = [
       "Purchase requisition routing."),
     A("contracts",  "Contract Repository",     "Tier 2", "Production", "T. Mbeki",    "Legal Technology",
       "Executed contract storage with clause search.", apex=True,
-      dis={"business_owner": "Legal Operations", "criticality": "Tier 1"}),
+      dis={"steward": "Legal Operations", "tier": "Critical"}),
 
     # --- fleet and compliance --------------------------------------------------
     A("assets",     "Asset Tracking",          "Tier 2", "Production", "L. Boateng",  "Fleet Data",
@@ -99,7 +99,7 @@ APPS = [
       "Regulatory reporting for hours of service and hazmat.", apex=True),
     A("safety",     "Safety Incident Tracker", "Tier 2", "Production", "N. Haddad",   "Risk & Compliance",
       "Incident intake, investigation and corrective action.", apex=True,
-      dis={"engineering_owner": "Corporate Systems"}),
+      dis={"delivery_team": "Corporate Systems"}),
 
     # --- operations ------------------------------------------------------------
     A("dock",       "Dock Scheduler",          "Tier 2", "Production", "P. Nakamura", "Warehouse Systems",
@@ -282,16 +282,17 @@ def apex_records():
             continue
         n += 1
         dis = a.get("dis") or {}
-        crit = dis.get("criticality", a["criticality"])
         rows.append({
             "asset_id": f"AX-{n:04d}",
             "asset_type": "Application",
             "title": a["name"],
             "summary": a["description"],
             "status": "Live" if a["lifecycle"] == "Production" else "Decommissioning",
-            "tier": TIER_MAP.get(crit, crit),
-            "steward": dis.get("business_owner", a["business_owner"]),
-            "delivery_team": dis.get("engineering_owner", a["engineering_owner"]),
+            # Apex's own vocabulary. A disagreement is stated here directly, not
+            # derived, so normalising on ingest cannot round-trip it into agreement.
+            "tier": dis.get("tier", TIER_MAP.get(a["criticality"], a["criticality"])),
+            "steward": dis.get("steward", a["business_owner"]),
+            "delivery_team": dis.get("delivery_team", a["engineering_owner"]),
         })
     for title, summary in APEX_ONLY:
         n += 1

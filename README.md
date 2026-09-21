@@ -21,15 +21,16 @@ interface, and the classification axes.
 
 ## Status
 
-Design settled; first build slice in progress.
+Design settled. The first build slice is working end to end on simulated data.
 
 | Artifact | State |
 |---|---|
-| [DESIGN.md](DESIGN.md) | Complete — 12 sections, 40+ recorded decisions |
-| [schema/](schema/) | Slice 1 — 24 tables, 6 views, SQLite + PostgreSQL |
-| [api/openapi.yaml](api/openapi.yaml) | Slice 1 — 35 paths, 42 operations, 40 schemas |
+| [DESIGN.md](DESIGN.md) | Complete — 12 sections, 60+ recorded decisions |
+| [schema/](schema/) | 24 tables, 7 views, SQLite reference + PostgreSQL |
+| [api/openapi.yaml](api/openapi.yaml) | 32 paths, 37 operations, 36 schemas |
 | [mocks/](mocks/) | Simulated ServiceNow, Apex ITAM, GitHub, SVN, Jenkins, spreadsheet |
-| Application | Not started |
+| [app/](app/) | Working — API, domain logic and UI over the whole slice |
+| [demo/](demo/) | End-to-end walkthrough against the simulated sources |
 
 **Slice 1 is inventory → mapping → coverage, on simulated data.** No SSDLC definitions, no
 evidence collection, no credentials. The point is to make the problem and the proposed
@@ -40,20 +41,39 @@ is still cheap.
 
 ## Try it
 
-```bash
-python mocks/generate_fixtures.py     # deterministic fixtures
-python mocks/serve.py                 # http://127.0.0.1:8900
-curl localhost:8900/                  # index of every endpoint
-```
+No install step — standard library only.
 
 ```bash
-python -c "import sqlite3,pathlib; sqlite3.connect('demo.db').executescript(pathlib.Path('schema/schema.sqlite.sql').read_text())"
+python -m demo.seed --db demo.db
 ```
 
-[`mocks/README.md`](mocks/README.md) walks ten demonstrable scenarios against the fixture
-data — tier selection, cross-CMDB disagreement, detected inventory omissions, shared
-decision rationale, staleness after drift, the partial-export trap, SVN subtree scoping,
-unmapped repositories, ungoverned artifacts, and decomposition.
+Walks the whole slice against the simulated sources and prints a narrative: register
+sources → ingest → decision packet → decide → diff → apply → map → subtree scopes →
+govern artifacts → detected omissions → decompose → re-sync with drift → the
+partial-export trap → coverage → lineage.
+
+```bash
+python -m app.serve --db demo.db      # http://127.0.0.1:8080
+```
+
+To drive the simulated back ends over HTTP instead of reading their fixtures:
+
+```bash
+python mocks/serve.py                 # http://127.0.0.1:8900 — curl / for the index
+```
+
+What the demo ends with, on 52 fictional applications at a logistics operator:
+
+| | |
+|---|---|
+| applications | 37 — 35 federated, **2 inferred** (in no CMDB at all) |
+| inventory records | 81 across three sources — 59 managed, 15 rejected, 7 undecided, **4 stale** |
+| field conflicts between the two CMDBs | 7, surfaced rather than silently resolved |
+| repositories | 70 — 50 mapped, 20 with no declared home |
+| build artifacts | 37 — 33 governed, **4 shipping with nothing governing them** |
+
+[`mocks/README.md`](mocks/README.md) explains the ten scenarios the fixture data is shaped
+around, and why each one is there.
 
 ---
 
@@ -106,6 +126,11 @@ own session, by API token, CSV export, browser automation, or typing — all rec
 distinguished by trust tier. Evidence collection *may* use narrowly-scoped read-only tokens,
 because fetching a scan report involves no judgment. Inventory does.
 
+**Code the happy path; infer the rest.** Rare paths are made recoverable by emitting rich,
+self-describing context rather than by writing code that almost never runs. Retiring a source
+writes an artifact of everything it reparented; there is no restore routine, because the
+artifact plus the API is enough for an agent to reconstruct from.
+
 ---
 
 ## Layout
@@ -117,11 +142,21 @@ schema/
   schema.postgres.sql  generated; differences documented in its header
 api/
   openapi.yaml         the API contract
+app/
+  core.py              ids, database, subject registry, audit
+  ingest.py            sources, sync, change classification, staleness
+  registry.py          applications, survivorship, entities, mappings
+  packets.py           the export / decide / diff / apply round trip
+  views.py             coverage, orphans, decisions, lineage
+  api.py               HTTP routing over the domain modules
+  ui/index.html        single-file UI, no build step
 mocks/
   generate_fixtures.py canonical data and its projections into each source
   serve.py             simulated ServiceNow, Apex ITAM, GitHub, SVN, Jenkins
   fixtures/            generated, committed, reproducible
   README.md            the ten demo scenarios
+demo/
+  seed.py              the end-to-end walkthrough
 ```
 
 The schema and the API contract are the durable artifacts. The UI is comparatively cheap to

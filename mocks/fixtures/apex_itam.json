@@ -15,7 +15,7 @@
     "title": "Billing Platform",
     "summary": "Freight invoicing, rating and settlement.",
     "status": "Live",
-    "tier": "Critical",
+    "tier": "High",
     "steward": "R. Castellanos-Ruiz",
     "delivery_team": "Revenue Systems"
   },
@@ -105,7 +105,7 @@
     "title": "Customs Filing",
     "summary": "Cross-border declarations and broker integration.",
     "status": "Live",
-    "tier": "High",
+    "tier": "Moderate",
     "steward": "S. Varga",
     "delivery_team": "Integration Services"
   },

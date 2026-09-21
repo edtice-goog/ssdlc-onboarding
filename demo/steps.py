@@ -86,7 +86,8 @@ def run_connect_servicenow(con):
             "facts": [f"{k}: {v} records" + ("   <- selected" if k == "cmdb_ci_business_app" else "")
                       for k, v in sorted(counts.items())],
             "note": "Nothing in the data says which class means \"application\". "
-                    "joe@ decided, and the decision is recorded on the source."}
+                    "joe@ decided, and the decision is recorded on the source.",
+            "link": "sources"}
 
 
 def run_ingest_servicenow(con):
@@ -98,7 +99,8 @@ def run_ingest_servicenow(con):
             "facts": [f"21 records at the other three tiers were never sent",
                       f"sync run {r['sync_run_id'][:12]}, method api, mode changeset"],
             "note": "Tier selection happened at the source, which is why no "
-                    "infrastructure CI is in scope."}
+                    "infrastructure CI is in scope.",
+            "link": "sources"}
 
 
 def run_build_packet(con):
@@ -298,7 +300,7 @@ def run_build(con):
             "facts": [o["display_name"] for o in views.orphans(con, "build_artifact")],
             "note": f"{un} ship with nothing governing them. Every one has a recent "
                     f"build. This is the row that earns the project.",
-            "link": "orphans"}
+            "link": "artifacts"}
 
 
 def run_omissions(con):

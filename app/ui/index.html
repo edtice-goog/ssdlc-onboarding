@@ -123,9 +123,17 @@ const post = (p,b) => fetch(API+p,{method:"POST",headers:{"Content-Type":"applic
 
 let DEMO = false;
 const PAGES = [
-  ["coverage","Coverage"], ["applications","Applications"], ["sources","Sources"],
-  ["repositories","Repositories"], ["artifacts","Artifacts"],
-  ["orphans","Orphans"], ["decisions","Decisions"], ["packets","Packets"], ["audit","Audit"],
+  ["dashboard","Dashboard"],
+  // then in workflow order, which is the order the walkthrough runs in and the
+  // order people think about the work
+  ["sources","Sources"],           // 1-2   connect and ingest
+  ["packets","Packets"],           // 3-4   decide what matters
+  ["applications","Applications"], // 5-7   what you got
+  ["repositories","Repositories"], // 8-9   map the code
+  ["artifacts","Artifacts"],       // 10    what actually ships
+  ["orphans","Orphans"],           // 11    what nothing covers
+  ["decisions","Decisions"],       // 13    the record, and what went stale
+  ["audit","Audit"],
 ];
 const pages = () => DEMO ? [["demo","Walkthrough"], ...PAGES] : PAGES;
 
@@ -157,16 +165,17 @@ const START = DEMO
 async function coverage(v) {
   const c = await get("/coverage/summary");
   if (!c.inventory.records_total && !c.applications.total) {
-    return v.innerHTML = `<h2>Coverage</h2>
+    return v.innerHTML = `<h2>Dashboard</h2>
       <p class="lede">What exists, what has been decided about, and what has not.</p>
       ${NOTHING("No inventory yet.", START)}`;
   }
   const a=c.applications, i=c.inventory, code=c.code, b=c.build;
   v.innerHTML = `
-    <h2>Coverage</h2>
+    <h2>Dashboard</h2>
     <p class="lede">What exists, what has been decided about, and what has not.
       <b>Unknown</b> and <b>dispositioned</b> are shown separately throughout &mdash; a gap
       nobody has looked at is not the same as one that was looked at and accepted.</p>
+    <h2 style="font-size:15px;margin-top:22px">Coverage</h2>
     <div class="grid">
       <div class="card"><h3>Applications</h3><div class="big">${a.total}</div>
         ${meter([[a.by_origin.federated,C.accent],[a.by_origin.manual,C.ok],[a.by_origin.inferred,C.warn]])}
@@ -564,13 +573,14 @@ async function runStep(key, btn) {
   if (nxt) document.getElementById("step-" + nxt.key)?.classList.add("next");
 }
 
-const ROUTES = {coverage, applications, application, sources, repositories, artifacts,
-                orphans, decisions, packets, packet, audit, demo};
+const ROUTES = {dashboard: coverage, coverage, applications, application, sources,
+                repositories, artifacts, orphans, decisions, packets, packet, audit, demo};
+const TAB_FOR = {application: "applications", packet: "packets", coverage: "dashboard"};
 
 async function render() {
-  const [page, arg] = (location.hash.slice(1) || "coverage").split("/");
+  const [page, arg] = (location.hash.slice(1) || "dashboard").split("/");
   const fn = ROUTES[page] || coverage;
-  nav(page === "application" ? "applications" : page === "packet" ? "packets" : page);
+  nav(TAB_FOR[page] || page);
   const v = document.getElementById("view");
   v.innerHTML = `<div class="empty">Loading&hellip;</div>`;
   try { await fn(v, arg); }

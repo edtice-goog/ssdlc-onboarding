@@ -78,6 +78,30 @@
           border-radius:20px; font-weight:600; letter-spacing:.03em; }
   .empty { padding:34px; text-align:center; color:var(--muted); background:var(--panel);
            border:1px solid var(--line); border-radius:9px; font-size:14px; }
+  .empty b { display:block; color:var(--ink); font-size:15px; margin-bottom:6px; }
+  .step { display:flex; gap:14px; padding:14px 16px; border:1px solid var(--line);
+          border-radius:9px; background:var(--panel); margin-bottom:9px; align-items:flex-start; }
+  .step.next { border-color:var(--accent); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 16%,transparent); }
+  .step.done { opacity:.62; }
+  .n { flex:none; width:25px; height:25px; border-radius:50%; background:var(--chip);
+       display:grid; place-items:center; font-size:12px; font-weight:600; color:var(--muted); }
+  .step.done .n { background:var(--ok); color:#fff; }
+  .step.next .n { background:var(--accent); color:#fff; }
+  .step h4 { margin:0 0 3px; font-size:14.5px; font-weight:600; }
+  .step p { margin:0; color:var(--muted); font-size:13.5px; max-width:62ch; }
+  .go { flex:none; background:var(--accent); color:#fff; border:0; border-radius:7px;
+        padding:7px 15px; font:inherit; font-size:13.5px; font-weight:550; cursor:pointer; }
+  .go:disabled { background:var(--chip); color:var(--muted); cursor:default; }
+  .result { margin-top:11px; padding:12px 14px; background:var(--chip); border-radius:7px;
+            font-size:13.5px; }
+  .result .h { font-weight:600; margin-bottom:6px; }
+  .result ul { margin:0; padding-left:18px; color:var(--muted); }
+  .result li { margin:1px 0; }
+  .result .why { margin-top:8px; padding-top:8px; border-top:1px solid var(--line);
+                 color:var(--muted); }
+  .ghost { background:none; border:1px solid var(--line); border-radius:6px; padding:6px 11px;
+           color:var(--muted); font:inherit; font-size:13.5px; cursor:pointer; }
+  .ghost:hover { color:var(--ink); }
 </style>
 </head>
 <body>
@@ -97,15 +121,17 @@ const get = (p) => fetch(API+p).then(r => r.json());
 const post = (p,b) => fetch(API+p,{method:"POST",headers:{"Content-Type":"application/json"},
                                   body:JSON.stringify(b)}).then(r=>r.json());
 
+let DEMO = false;
 const PAGES = [
   ["coverage","Coverage"], ["applications","Applications"], ["sources","Sources"],
   ["repositories","Repositories"], ["artifacts","Artifacts"],
   ["orphans","Orphans"], ["decisions","Decisions"], ["packets","Packets"], ["audit","Audit"],
 ];
+const pages = () => DEMO ? [["demo","Walkthrough"], ...PAGES] : PAGES;
 
 function nav(active) {
   const n = document.getElementById("nav"); n.innerHTML = "";
-  for (const [id,label] of PAGES) {
+  for (const [id,label] of pages()) {
     const b = document.createElement("button");
     b.textContent = label; b.className = id===active ? "on" : "";
     b.onclick = () => go(id);
@@ -123,8 +149,18 @@ const C = { ok:"var(--ok)", warn:"var(--warn)", bad:"var(--bad)", chip:"var(--ch
 
 // ------------------------------------------------------------------ pages
 
+const NOTHING = (what, hint) => `<div class="empty"><b>${what}</b>${hint||""}</div>`;
+const START = DEMO
+  ? ` Nothing has been connected yet. <a onclick="go('demo')">Start the walkthrough</a>.`
+  : ` Register a source and ingest from it to begin.`;
+
 async function coverage(v) {
   const c = await get("/coverage/summary");
+  if (!c.inventory.records_total && !c.applications.total) {
+    return v.innerHTML = `<h2>Coverage</h2>
+      <p class="lede">What exists, what has been decided about, and what has not.</p>
+      ${NOTHING("No inventory yet.", START)}`;
+  }
   const a=c.applications, i=c.inventory, code=c.code, b=c.build;
   v.innerHTML = `
     <h2>Coverage</h2>
@@ -194,7 +230,9 @@ async function applications(v) {
     const o=document.getElementById("origin").value;
     const items = r.items.filter(a =>
       (!o||a.origin===o) && (!q || (a.name+a.handle).toLowerCase().includes(q)));
-    document.getElementById("rows").innerHTML = !items.length ? `<div class="empty">No matches.</div>` :
+    document.getElementById("rows").innerHTML = !items.length ?
+      (r.items.length ? `<div class="empty">No matches for that filter.</div>`
+                      : NOTHING("No applications yet.", START)) :
       `<table><thead><tr><th>ID</th><th>Name</th><th>Origin</th><th>Criticality</th>
         <th>Owner</th><th>Sources</th><th>Entities</th><th>Repos</th><th>State</th></tr></thead><tbody>
       ${items.map(a=>`<tr>
@@ -266,6 +304,14 @@ async function application(v, id) {
 
 async function sources(v) {
   const s = await get("/sources");
+  if (s.filter(x => !x.is_system).length === 0) {
+    return v.innerHTML = `<h2>Sources</h2>
+      <p class="lede">Every connected system, registered once per role.</p>
+      ${NOTHING("No sources connected yet.", START)}
+      <div class="note"><b>The Internal Register is always present.</b> Applications and
+        managed entities belong to it rather than to a null, so every entity resolves to
+        a source by the same query.</div>`;
+  }
   v.innerHTML = `<h2>Sources</h2>
     <p class="lede">Every connected system, registered once <em>per role</em>. A host serving
       both repositories and builds is two registrations under two ids &mdash; so the teams that
@@ -289,6 +335,8 @@ async function sources(v) {
 
 async function repositories(v) {
   const r = await get("/repositories?limit=500");
+  if (!r.items.length) return v.innerHTML = `<h2>Repositories</h2>
+    ${NOTHING("No repositories yet.", START)}`;
   v.innerHTML = `<h2>Repositories</h2>
     <p class="lede">Subtree scopes matter: without them the finest grain in an SVN repository
       is the repository itself, which maps to five applications at once and is useless.</p>
@@ -316,6 +364,8 @@ async function repositories(v) {
 
 async function artifacts(v) {
   const r = await get("/build-artifacts?limit=500");
+  if (!r.items.length) return v.innerHTML = `<h2>Build artifacts</h2>
+    ${NOTHING("No build artifacts yet.", START)}`;
   const un = r.items.filter(a=>!a.governed).length;
   v.innerHTML = `<h2>Build artifacts</h2>
     <p class="lede">An artifact is an identity, not an occurrence. Each resolves to exactly one
@@ -372,6 +422,7 @@ async function decisions(v) {
         <td><span class="chip">${s.disposition}</span></td>
         <td class="mono muted">${(s.changed_fields||[]).join(", ")}</td>
         <td class="muted">${esc(s.rationale)}</td></tr>`).join("")}</tbody></table></div>`:""}
+    ${!d.items.length?NOTHING("No decisions recorded yet.", START):`
     <table><thead><tr><th>When</th><th>Kind</th><th>Disposition</th><th>Subjects</th>
       <th style="width:44%">Rationale</th><th>By</th></tr></thead><tbody>
     ${d.items.map(x=>`<tr><td class="mono muted">${x.decided_at.slice(0,10)}</td>
@@ -381,7 +432,7 @@ async function decisions(v) {
       <td class="mono">${x.subject_count}${x.stale_subject_count?
         ` <span class="chip warn">${x.stale_subject_count} stale</span>`:""}</td>
       <td>${esc(x.rationale)}</td><td class="muted">${esc(x.decided_by)}</td></tr>`).join("")}
-    </tbody></table>`;
+    </tbody></table>`}`;
 }
 
 async function packets(v) {
@@ -390,7 +441,7 @@ async function packets(v) {
     <p class="lede">Judgment over long lists goes to a Claude session, not a rules engine. We
       export the candidates, a person reasons about them, and hands back decisions we diff and
       apply. The export is the product surface: what comes back is bounded by what we put in.</p>
-    ${!p.length?`<div class="empty">No packets yet.</div>`:
+    ${!p.length?NOTHING("No decision packets yet.", START):
     `<table><thead><tr><th>Created</th><th>Subject</th><th>Rows</th><th>Status</th>
       <th style="width:42%">Purpose</th><th>By</th></tr></thead><tbody>
     ${p.map(x=>`<tr><td class="mono muted">${x.created_at.slice(0,10)}</td>
@@ -433,7 +484,7 @@ async function audit(v) {
       this log.</p>
     <table><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Subject</th>
       <th style="width:38%">Detail</th></tr></thead><tbody>
-    ${r.items.map(e=>`<tr><td class="mono muted">${e.at.slice(0,16).replace("T"," ")}</td>
+    ${!r.items.length?"":r.items.map(e=>`<tr><td class="mono muted">${e.at.slice(0,16).replace("T"," ")}</td>
       <td class="muted">${esc((e.actor||"").split("@")[0])}</td>
       <td class="mono">${esc(e.action)}</td>
       <td>${esc(e.display_name||"")}</td>
@@ -442,8 +493,79 @@ async function audit(v) {
       </tr>`).join("")}</tbody></table>`;
 }
 
+async function demo(v) {
+  const st = await get("/demo/steps");
+  const done = st.steps.filter(s => s.done).length;
+  v.innerHTML = `
+    <h2>Walkthrough</h2>
+    <p class="lede">Fourteen steps against simulated source systems, starting from an empty
+      database. Each one performs the real operation through the real API &mdash; nothing here
+      is staged. Run them in order and watch the rest of the application fill up.</p>
+    <div class="row">
+      <span class="chip ${done===st.steps.length?"ok":""}">${done} of ${st.steps.length} done</span>
+      <button class="ghost" id="reset">Reset to empty</button>
+      ${done<st.steps.length?`<button class="ghost" id="all">Run the rest</button>`:""}
+    </div>
+    <div id="steps">${st.steps.map(stepHtml).join("")}</div>
+    <div class="note" style="margin-top:22px"><b>This page is scaffolding, not product.</b>
+      It is served only when the application is started with <span class="mono">--demo</span>,
+      and its endpoints sit under <span class="mono">/demo</span> so they cannot be mistaken
+      for the contract in <span class="mono">api/openapi.yaml</span>.</div>`;
+
+  document.getElementById("reset").onclick = async (e) => {
+    e.target.disabled = true; e.target.textContent = "Resetting…";
+    await post("/demo/reset", {}); render();
+  };
+  const all = document.getElementById("all");
+  if (all) all.onclick = async (e) => {
+    e.target.disabled = true;
+    for (const s of st.steps.filter(x => !x.done)) {
+      e.target.textContent = `Running ${s.title}…`;
+      await post(`/demo/steps/${s.key}/run`, {});
+    }
+    render();
+  };
+  for (const s of st.steps) {
+    const b = document.getElementById("run-" + s.key);
+    if (b) b.onclick = () => runStep(s.key, b);
+  }
+}
+
+function stepHtml(s) {
+  return `<div class="step ${s.done?"done":""} ${s.next?"next":""}" id="step-${s.key}">
+    <div class="n">${s.done?"✓":s.n}</div>
+    <div style="flex:1">
+      <h4>${esc(s.title)}</h4><p>${esc(s.blurb)}</p>
+      <div id="out-${s.key}"></div>
+    </div>
+    ${s.done?'<span class="chip ok">done</span>'
+            :`<button class="go" id="run-${s.key}">Run</button>`}
+  </div>`;
+}
+
+async function runStep(key, btn) {
+  btn.disabled = true; btn.textContent = "Running…";
+  const r = await post(`/demo/steps/${key}/run`, {});
+  const out = document.getElementById("out-" + key);
+  out.innerHTML = `<div class="result">
+    <div class="h">${esc(r.headline || "")}</div>
+    ${(r.facts||[]).filter(Boolean).length
+      ? `<ul>${r.facts.filter(Boolean).map(f=>`<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+    ${r.note ? `<div class="why">${esc(r.note)}</div>` : ""}
+    ${r.link ? `<div style="margin-top:9px"><a onclick="go('${r.link.split("/")[0]}',
+        '${r.link.split("/")[1]||""}')">Look at it &rarr;</a></div>` : ""}
+  </div>`;
+  const step = document.getElementById("step-" + key);
+  step.classList.add("done"); step.classList.remove("next");
+  step.querySelector(".n").textContent = "✓";
+  btn.replaceWith($(`<span class="chip ok">done</span>`));
+  const st = await get("/demo/steps");
+  const nxt = st.steps.find(s => s.next);
+  if (nxt) document.getElementById("step-" + nxt.key)?.classList.add("next");
+}
+
 const ROUTES = {coverage, applications, application, sources, repositories, artifacts,
-                orphans, decisions, packets, packet, audit};
+                orphans, decisions, packets, packet, audit, demo};
 
 async function render() {
   const [page, arg] = (location.hash.slice(1) || "coverage").split("/");
@@ -455,11 +577,14 @@ async function render() {
   catch (e) { v.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
 }
 window.addEventListener("hashchange", render);
-get("/sources").then(s => {
-  document.getElementById("demoflag").hidden =
-    !s.some(x => /Meridian|ServiceNow|Apex/i.test(x.name || ""));
-});
-render();
+
+// The walkthrough page exists only when the server was started with --demo.
+fetch(API + "/demo/steps").then(r => {
+  DEMO = r.ok;
+  document.getElementById("demoflag").hidden = !DEMO;
+  if (DEMO && !location.hash) location.hash = "demo";
+  render();
+}).catch(() => render());
 </script>
 </body>
 </html>

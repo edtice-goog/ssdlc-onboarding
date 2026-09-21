@@ -347,6 +347,73 @@ def _sync(con, q, body, syncRunId, **_):
     return r
 
 
+# ------------------------------------------------------------------- demo
+# Demo scaffolding, not product.  Registered only when the server is started
+# with --demo, and namespaced under /demo so it cannot be mistaken for the
+# contract in api/openapi.yaml.
+
+DEMO = False
+
+
+def enable_demo():
+    global DEMO
+    if DEMO:
+        return
+    DEMO = True
+    from demo import steps
+
+    @route("GET", "/demo/steps")
+    def _demo_steps(con, q, body, **_):
+        return {"steps": steps.state(con),
+                "empty": not rows(con, "SELECT 1 FROM source WHERE is_system=0 LIMIT 1")}
+
+    @route("POST", "/demo/steps/{stepKey}/run")
+    def _demo_run(con, q, body, stepKey, **_):
+        return steps.run(con, stepKey)
+
+    @route("POST", "/demo/reset")
+    def _demo_reset(con, q, body, **_):
+        """Back to an empty database, keeping only the seeded Internal Register.
+
+        A reset is a bulk wipe, not a business operation, so constraints are
+        deferred for the duration rather than hand-maintaining a delete order
+        that would drift every time a foreign key is added. The consistency
+        claim is then checked rather than assumed.
+        """
+        con.commit()
+        con.execute("PRAGMA foreign_keys = OFF")
+        try:
+            for t in ("audit_event", "sync_op", "sync_run", "decision_subject",
+                      "decision", "decision_packet", "orphan_disposition",
+                      "classification_label", "attribute_resolution",
+                      "application_source_link", "application_alias",
+                      "repository_mapping", "build_artifact", "managed_entity",
+                      "application", "repo_scope", "repository_attribute",
+                      "repository", "inventory_record_attribute", "inventory_record",
+                      "source_field_priority", "source_decision_field", "subject"):
+                con.execute(f"DELETE FROM {t}")
+            con.execute("DELETE FROM source WHERE is_system = 0")
+            con.commit()
+        finally:
+            con.execute("PRAGMA foreign_keys = ON")
+
+        violations = con.execute("PRAGMA foreign_key_check").fetchall()
+        if violations:
+            raise Refused("reset_left_violations",
+                          "Reset completed but left foreign key violations.",
+                          detail=f"{len(violations)} rows: {violations[:5]}",
+                          remedy="Delete the database file and start over.",
+                          status=500)
+
+        for d in ("archive", "artifacts"):
+            for f in pathlib.Path(d).glob("*"):
+                try:
+                    f.unlink()
+                except OSError:
+                    pass
+        return {"reset": True, "steps": steps.state(con)}
+
+
 # ------------------------------------------------------------------ server
 
 class Handler(BaseHTTPRequestHandler):
@@ -425,12 +492,16 @@ class Handler(BaseHTTPRequestHandler):
             print(f"  {self.command} {self.path}")
 
 
-def serve(host="127.0.0.1", port=8080, db="ssdlc.db"):
+def serve(host="127.0.0.1", port=8080, db="ssdlc.db", demo=False):
     Handler.db_path = db
     connect(db).close()
+    if demo:
+        enable_demo()
     srv = ThreadingHTTPServer((host, port), Handler)
     print(f"SSDLC Onboarding on http://{host}:{port}/   (db: {db})")
     print(f"API under {PREFIX}; contract in api/openapi.yaml")
+    if demo:
+        print("Demo workflow enabled at /#demo  (scaffolding, not part of the contract)")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

@@ -11,8 +11,10 @@ def main():
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8080)
     ap.add_argument("--db", default="ssdlc.db")
+    ap.add_argument("--demo", action="store_true",
+                    help="expose the guided demo workflow at /#demo")
     a = ap.parse_args()
-    serve(a.host, a.port, a.db)
+    serve(a.host, a.port, a.db, a.demo)
 
 
 if __name__ == "__main__":
